@@ -1,7 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flare_flutter/flare_actor.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -59,7 +59,10 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget _buildStatItem(String label, int count) {
+  Widget _buildStatItem(
+    String label,
+    int count,
+  ) {
     TextStyle _statLabelTextStyle = TextStyle(
       fontFamily: 'Roboto',
       color: Colors.black,
@@ -101,6 +104,7 @@ class _ProfileState extends State<Profile> {
           _buildStatItem("Followers", _followers),
           _buildStatItem("Uploads", _uploads),
           _buildStatItem("Level", _level),
+          
         ],
       ),
     );
@@ -114,10 +118,11 @@ class _ProfileState extends State<Profile> {
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return new CircularProgressIndicator(
-              valueColor: new AlwaysStoppedAnimation<Color>(
-                Colors.white,
-              ),
+            return new FlareActor(
+              "assets/flare/loading.flr",
+              alignment: Alignment.center,
+              fit: BoxFit.contain,
+              animation: "Untitled",
             );
           }
           var userDocument = snapshot.data;
@@ -163,9 +168,9 @@ class _ProfileState extends State<Profile> {
         title: Text(
           "profile",
           // widget.fullName,
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.transparent,
+        backgroundColor: Color(0xfffd6a02),
       ),
       body: loading == false
           ? Stack(
@@ -186,7 +191,12 @@ class _ProfileState extends State<Profile> {
               ],
             )
           : Center(
-              child: CircularProgressIndicator(),
+              child: FlareActor(
+                "assets/flare/loading.flr",
+                alignment: Alignment.center,
+                fit: BoxFit.contain,
+                animation: "Untitled",
+              ),
             ),
     );
   }

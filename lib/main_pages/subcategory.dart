@@ -49,13 +49,17 @@ class _SubCategoryFullState extends State<SubCategoryFull> {
                     print(hashSimplified);
                   }
                   return CardLayout(
-                    uid: ds['uid'],
-                    username: ds['username'],
-                    msgUid: ds['msg_uid'],
-                    title: ds['title'],
-                    category: ds['category'],
-                    hashtags: hashSimplified,
-                    img: ds['img'],
+                      uid: ds['uid'],
+                      username: ds['username'],
+                      msgUid: ds['msg_uid'],
+                      title: ds['title'],
+                      category: ds['category'],
+                      hashtags: hashSimplified,
+                      img: ds['img'],
+                      docId: ds.documentID,
+                      likesList: ds['likes'] ,
+                      viewers: ds['viewers'],
+                      commentList:ds['comments'],
                   );
                 });
           }),

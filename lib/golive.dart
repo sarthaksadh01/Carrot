@@ -5,7 +5,10 @@ import './agora_utils/videosession.dart';
 import './agora_utils/settings.dart';
 import 'package:random_string/random_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:socket_flutter_plugin/socket_flutter_plugin.dart';
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class GoLive extends StatefulWidget {
   final String channelName, category, title, username, img;
@@ -49,6 +52,10 @@ class _GoLiveState extends State<GoLive> {
   @override
   void initState() {
     super.initState();
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     // initialize agora sdk
     initialize();
     // s _leaveChanel();
@@ -96,7 +103,7 @@ class _GoLiveState extends State<GoLive> {
         (String channel, int uid, int elapsed) {
       _updateDatabase();
       setState(() {
-        String info = "Yo Are Live";
+        String info = "You Are Live";
         _infoStrings.add(info);
       });
     };
@@ -181,52 +188,16 @@ class _GoLiveState extends State<GoLive> {
     return Expanded(child: Container(child: view));
   }
 
-  /// Video view row wrapper
-  Widget _expandedVideoRow(List<Widget> views) {
-    List<Widget> wrappedViews =
-        views.map((Widget view) => _videoView(view)).toList();
-    return Expanded(
-        child: Row(
-      children: wrappedViews,
-    ));
-  }
-
-  /// Video layout wrapper
   Widget _viewRows() {
     List<Widget> views = _getRenderViews();
-    switch (views.length) {
-      case 1:
-        return Container(
-            child: Column(
-          children: <Widget>[_videoView(views[0])],
-        ));
-      case 2:
-        return Container(
-            child: Column(
-          children: <Widget>[
-            // _expandedVideoRow([views[0]]),
-            _expandedVideoRow([views[1]])
-          ],
-        ));
-      case 3:
-        return Container(
-            child: Column(
-          children: <Widget>[
-            _expandedVideoRow(views.sublist(0, 2)),
-            _expandedVideoRow(views.sublist(2, 3))
-          ],
-        ));
-      case 4:
-        return Container(
-            child: Column(
-          children: <Widget>[
-            _expandedVideoRow(views.sublist(0, 2)),
-            _expandedVideoRow(views.sublist(2, 4))
-          ],
-        ));
-      default:
+    if (views.length == 1) {
+      return Container(
+          child: Column(
+        children: <Widget>[_videoView(views[0])],
+      ));
+    } else {
+      return Container();
     }
-    return Container();
   }
 
   /// Toolbar layout
@@ -336,10 +307,40 @@ class _GoLiveState extends State<GoLive> {
           backgroundColor: Color(0xfffd6a02),
           title: Text("Live"),
         ),
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.white,
         body: Center(
             child: Stack(
-          children: <Widget>[_viewRows(), _panel(), _toolbar()],
+          children: <Widget>[
+            _viewRows(),
+            _panel(),
+            _toolbar(),
+            StreamBuilder(
+                stream: Firestore.instance
+                    .collection('Live')
+                    .where('msg_uid', isEqualTo: msg_uid)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Text("");
+                  }
+                  DocumentSnapshot ds = snapshot.data.documents[0];
+                  return Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Row(
+                      children: <Widget>[
+                        Icon(
+                          Icons.live_tv,
+                          color: Color(0xfffd6a02),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 5),
+                          child: Text("${ds['viewers'].length}"),
+                        )
+                      ],
+                    ),
+                  );
+                })
+          ],
         )));
   }
 
@@ -352,41 +353,34 @@ class _GoLiveState extends State<GoLive> {
       'username': widget.username,
       'msg_uid': msg_uid,
       'hashtags': widget.hashtags,
-      'viewers': 0,
-      'total_viewers': 0,
+      'viewers': [],
+      'likes': [],
+      'comments': [],
       'time': new DateTime.now().millisecondsSinceEpoch,
       'status': 'online',
       'title': widget.title,
       'img': widget.img
-    }).then((onValue) {
-      SocketFlutterPlugin myIO = new SocketFlutterPlugin();
-      
-      myIO.socket("https://firebase-sockets.herokuapp.com/");
-      myIO.connect();
-      String jsonData = '{"msg_uid":$msg_uid}';
-      myIO.emit("userLive", jsonData);
+    }).then((doc) async {
+      var result = await http
+          .post("http://firebase-sockets.herokuapp.com/notifications", body: {
+        "uid": widget.channelName,
+        "msg_uid": msg_uid,
+        "doc_id": doc.documentID
+      });
+       Fluttertoast.showToast(
+            msg: "notified",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIos: 1,
+            backgroundColor: Color(0xfffd6a02),
+            textColor: Colors.white,
+            fontSize: 16.0);
+     
     }).catchError((e) {});
     // _onDisconnect();
   }
 
   _leaveChanel() {
-    Firestore.instance
-        .collection('Live')
-        .where('msg_uid', isEqualTo: msg_uid)
-        .getDocuments()
-        .then((querySnapshot) {
-      querySnapshot.documents.forEach((doc) {
-        Firestore.instance
-            .collection('Live')
-            .document(doc.documentID)
-            .updateData({'status': 'offline'}).then((onValue) {
-          print('done');
-        });
-      });
-    });
-  }
-
-  _onDisconnect() {
     Firestore.instance
         .collection('Live')
         .where('msg_uid', isEqualTo: msg_uid)

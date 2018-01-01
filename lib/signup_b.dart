@@ -18,6 +18,8 @@ class _SignupBFullState extends State<SignupBFull> {
   DateTime t;
   bool otp = false, vfy = false, loading = false;
   String uname = "", phone = "", password = "", gender = "";
+  final TextEditingController _uname = new TextEditingController();
+  final TextEditingController _pno = new TextEditingController();
   @override
   void initState() {
     if (photo == null) photo = "null";
@@ -45,9 +47,12 @@ class _SignupBFullState extends State<SignupBFull> {
           Padding(
               padding: EdgeInsets.fromLTRB(30, 20, 30, 10),
               child: TextField(
+                controller: _uname,
                 onChanged: (val) {
                   setState(() {
-                    uname = val;
+                    val.replaceAll(" ", "_");
+                    _uname.text=_uname.text.replaceAll(" ", "_");
+                    uname = _uname.text;
                   });
                 },
                 decoration: new InputDecoration(
@@ -74,9 +79,12 @@ class _SignupBFullState extends State<SignupBFull> {
           Padding(
               padding: EdgeInsets.fromLTRB(30, 0, 30, 10),
               child: TextField(
+                controller: _pno,
                 onChanged: (val) {
                   setState(() {
-                    phone = val;
+                    _pno.text=_pno.text.substring(0, 10);
+                    if (val.length > 10) val = val.substring(0, 9);
+                    phone = _pno.text;
                   });
                 },
                 keyboardType: TextInputType.phone,
@@ -288,12 +296,13 @@ class _SignupBFullState extends State<SignupBFull> {
         'pic': photo,
         'time': new DateTime.now().millisecondsSinceEpoch,
         'level': 1,
-        'followers':FieldValue.arrayUnion([])
+        'followers': FieldValue.arrayUnion([]),
+        'notifications': []
       }).then((onValue) {
         Navigator.pushReplacementNamed(context, '/Home');
       }).catchError((e) {
         Fluttertoast.showToast(
-            msg: e.toString(),
+            msg: e.message,
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
             timeInSecForIos: 1,
@@ -306,7 +315,7 @@ class _SignupBFullState extends State<SignupBFull> {
       });
     }).catchError((e) {
       Fluttertoast.showToast(
-          msg: e.toString(),
+          msg: e.message,
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           timeInSecForIos: 1,
@@ -315,6 +324,7 @@ class _SignupBFullState extends State<SignupBFull> {
           fontSize: 16.0);
       setState(() {
         otp = false;
+        loading = false;
       });
     });
   }

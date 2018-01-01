@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flare_flutter/flare_actor.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class OtherProfile extends StatefulWidget {
   OtherProfile({this.fullName, this.uid});
@@ -16,6 +18,7 @@ class _OtherProfileState extends State<OtherProfile> {
   bool loading = true;
   bool _isFollowing = false;
   bool followLoading = true;
+  bool isNotified = false;
   FirebaseAuth auth;
   // =
   FirebaseUser user;
@@ -24,6 +27,8 @@ class _OtherProfileState extends State<OtherProfile> {
   void initState() {
     _loadUser();
     _loadData();
+    loadIsFollowed();
+
     super.initState();
   }
 
@@ -75,19 +80,32 @@ class _OtherProfileState extends State<OtherProfile> {
       fontWeight: FontWeight.bold,
     );
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text(
-          '$count',
-          style: _statCountTextStyle,
-        ),
-        Text(
-          label,
-          style: _statLabelTextStyle,
-        ),
-      ],
-    );
+    return label != "icon"
+        ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                '$count',
+                style: _statCountTextStyle,
+              ),
+              Text(
+                label,
+                style: _statLabelTextStyle,
+              )
+            ],
+          )
+        : IconButton(
+            icon: isNotified == false
+                ? Icon(Icons.notifications)
+                : Icon(Icons.notifications_off),
+            onPressed: () {
+              if (isNotified)
+                _notNotified();
+              else {
+                _notified();
+              }
+            },
+          );
   }
 
   Widget _buildStatContainer() {
@@ -103,6 +121,7 @@ class _OtherProfileState extends State<OtherProfile> {
           _buildStatItem("Followers", _followers),
           _buildStatItem("Uploads", _uploads),
           _buildStatItem("Level", _level),
+          _buildStatItem("icon", _level),
         ],
       ),
     );
@@ -138,7 +157,12 @@ class _OtherProfileState extends State<OtherProfile> {
                                 fontWeight: FontWeight.w600,
                               ),
                             )
-                          : CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),)
+                          : FlareActor(
+                              "assets/flare/loading.flr",
+                              alignment: Alignment.center,
+                              fit: BoxFit.contain,
+                              animation: "Untitled",
+                            )
                       : followLoading == false
                           ? Text(
                               "FOLLOW",
@@ -147,7 +171,12 @@ class _OtherProfileState extends State<OtherProfile> {
                                 fontWeight: FontWeight.w600,
                               ),
                             )
-                          : CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),),
+                          : FlareActor(
+                              "assets/flare/loading.flr",
+                              alignment: Alignment.center,
+                              fit: BoxFit.contain,
+                              animation: "Untitled",
+                            ),
                 ),
               ),
             ),
@@ -185,9 +214,9 @@ class _OtherProfileState extends State<OtherProfile> {
       appBar: AppBar(
         title: Text(
           widget.fullName,
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.transparent,
+        backgroundColor: Color(0xfffd6a02),
       ),
       body: loading == false
           ? Stack(
@@ -207,7 +236,12 @@ class _OtherProfileState extends State<OtherProfile> {
               ],
             )
           : Center(
-              child: CircularProgressIndicator(),
+              child: FlareActor(
+                "assets/flare/loading.flr",
+                alignment: Alignment.center,
+                fit: BoxFit.contain,
+                animation: "Untitled",
+              ),
             ),
       bottomNavigationBar: _buildButtons(),
     );
@@ -246,9 +280,58 @@ class _OtherProfileState extends State<OtherProfile> {
         setState(() {
           _followers = flwrs.length;
           loading = false;
-           followLoading = false;
+          followLoading = false;
         });
       });
+    });
+  }
+
+   loadIsFollowed() {
+    FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+    _firebaseMessaging.getToken().then((token) {
+      Firestore.instance
+          .collection("Users")
+          .document(widget.uid)
+          .get()
+          .then((doc) {
+        var notificationArray = doc.data['notifications'];
+        for (int i = 0; i < notificationArray.length; i++) {
+          if (notificationArray[i] == token.toString()) {
+            setState(() {
+              isNotified=true;
+              
+            });
+            break;
+          }
+        }
+      });
+      print(token);
+    });
+
+
+  }
+
+  _notNotified() {
+    setState(() {
+      isNotified = false;
+    });
+    FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+    _firebaseMessaging.getToken().then((token) {
+      Firestore.instance.collection("Users").document(widget.uid).updateData({
+        "notifications": FieldValue.arrayRemove([token])
+      }).then((onValue) {});
+    });
+  }
+
+  _notified() {
+    setState(() {
+      isNotified = true;
+    });
+    FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+    _firebaseMessaging.getToken().then((token) {
+      Firestore.instance.collection("Users").document(widget.uid).updateData({
+        "notifications": FieldValue.arrayUnion([token])
+      }).then((onValue) {});
     });
   }
 

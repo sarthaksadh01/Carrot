@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:easy_dialogs/easy_dialogs.dart';
 import 'package:loader_search_bar/loader_search_bar.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import './comments.dart';
 import './profile.dart';
 import './main_pages/categories.dart';
@@ -17,7 +18,6 @@ import './golive_screen.dart';
 import './main_pages/viewlive.dart';
 import './other_profile.dart';
 import './search.dart';
-
 
 void main() {
   runApp(MaterialApp(
@@ -40,7 +40,6 @@ void main() {
       '/Apps': (context) => ListAppsPages(),
       '/OtherProfile': (context) => OtherProfile(),
       'Search': (context) => Search()
-      
     },
   ));
 }
@@ -55,6 +54,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   Categories categories = new Categories();
   Home home = new Home();
   Private private = new Private();
@@ -63,6 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     currentPage = home;
+    firebaseCloudMessagingListeners();
 
     super.initState();
   }
@@ -71,35 +72,32 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: SearchBar(
-          searchHint: 'Search hashtags',
+            searchHint: 'Search hashtags',
             defaultBar: AppBar(
-          leading: Icon(Icons.games),
-          backgroundColor: Color(0xfffd6a02),
-          title:Text("Carrot"),
-          actions: <Widget>[
-            Padding(
-                padding: EdgeInsets.all(5),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.portrait,
-                    size: 30,
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/Profile');
-                  },
-                ))
-          ],
-        ),
-        onQuerySubmitted: (query){
-
-            Navigator.of(context).push(new MaterialPageRoute(
-                      settings: const RouteSettings(name: '/Search'),
-                      builder: (context) => new Search(
-                            search: "#"+query.toLowerCase(),
-                          )));
-
-        }
-        ),
+              leading: Icon(Icons.games),
+              backgroundColor: Color(0xfffd6a02),
+              title: Text("Carrot"),
+              actions: <Widget>[
+                Padding(
+                    padding: EdgeInsets.all(5),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.portrait,
+                        size: 30,
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/Profile');
+                      },
+                    ))
+              ],
+            ),
+            onQuerySubmitted: (query) {
+              Navigator.of(context).push(new MaterialPageRoute(
+                  settings: const RouteSettings(name: '/Search'),
+                  builder: (context) => new Search(
+                        search: "#" + query.toLowerCase(),
+                      )));
+            }),
         body: currentPage,
         floatingActionButton: FloatingActionButton(
             backgroundColor: Color(0xfffd6a02),
@@ -161,6 +159,27 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _getApps() {
+    // _firebaseMessaging.getToken().then((token) {
+    //   print(token);
+    // });
     Navigator.of(context).pushNamed('/ScreenRecord');
+  }
+
+  void firebaseCloudMessagingListeners() {
+    _firebaseMessaging.getToken().then((token) {
+      print(token);
+    });
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print('on message $message');
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print('on resume $message');
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print('on launch $message');
+      },
+    );
   }
 }

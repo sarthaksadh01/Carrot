@@ -1,19 +1,21 @@
 import 'dart:async';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
-import 'package:firebase_database/ui/firebase_animated_list.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import './agora_utils/videosession.dart';
 import './agora_utils/settings.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:random_color/random_color.dart';
+import 'package:flutter/services.dart';
 
 class ViewLive extends StatefulWidget {
-  final String channelName, msgUid;
+  final String channelName, msgUid, docId;
 
   /// Creates a call page with given channel name.
-  const ViewLive({Key key, this.channelName, this.msgUid}) : super(key: key);
+  const ViewLive(
+      {Key key, this.channelName, this.msgUid, this.docId})
+      : super(key: key);
 
   @override
   _GoLiveState createState() {
@@ -22,11 +24,16 @@ class ViewLive extends StatefulWidget {
 }
 
 class _GoLiveState extends State<ViewLive> {
+  RandomColor _randomColor;
+  Color _color;
   static final _sessions = List<VideoSession>();
   final _infoStrings = <String>[];
   bool muted = false;
-  bool chat = true;
-  String msg;
+  bool isFullScreen = false;
+  String userName = "";
+  bool liked;
+  final TextEditingController _msg = new TextEditingController();
+  
 
   @override
   void dispose() {
@@ -35,15 +42,19 @@ class _GoLiveState extends State<ViewLive> {
       AgoraRtcEngine.removeNativeView(session.viewId);
     });
     _sessions.clear();
-    _removeLive();
     AgoraRtcEngine.leaveChannel();
     super.dispose();
   }
 
   @override
   void initState() {
-    super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+    _randomColor = RandomColor();
+    _loadUserName();
     initialize();
+    super.initState();
   }
 
   void initialize() {
@@ -116,9 +127,7 @@ class _GoLiveState extends State<ViewLive> {
       });
     };
 
-    AgoraRtcEngine.onLeaveChannel = () {
-      _removeLive();
-    };
+    AgoraRtcEngine.onLeaveChannel = () {};
 
     AgoraRtcEngine.onUserJoined = (int uid, int elapsed) {
       setState(() {
@@ -135,7 +144,6 @@ class _GoLiveState extends State<ViewLive> {
         String info = 'userOffline: ' + uid.toString();
         // _infoStrings.add(info);
         _removeRenderView(uid);
-        _removeLive();
       });
     };
 
@@ -153,8 +161,6 @@ class _GoLiveState extends State<ViewLive> {
     };
   }
 
-  /// Create a native view and add a new video session object
-  /// The native viewId can be used to set up local/remote view
   void _addRenderView(int uid, Function(int viewId) finished) {
     Widget view = AgoraRtcEngine.createNativeView(uid, (viewId) {
       setState(() {
@@ -189,54 +195,57 @@ class _GoLiveState extends State<ViewLive> {
     return _sessions.map((session) => session.view).toList();
   }
 
-  /// Video view wrapper
-  Widget _videoView(view) {
-    return Expanded(child: Container(child: view));
-  }
-
-  /// Video view row wrapper
-  Widget _expandedVideoRow(List<Widget> views) {
-    List<Widget> wrappedViews =
-        views.map((Widget view) => _videoView(view)).toList();
-    return Expanded(
-        child: Row(
-      children: wrappedViews,
-    ));
-  }
-
   /// Video layout wrapper
-  Widget _viewRows() {
+  Widget _viewRowsHalfScreen() {
     List<Widget> views = _getRenderViews();
     switch (views.length) {
       case 1:
-        return Container(
-            child: Column(
-          children: <Widget>[_videoView(views[0])],
-        ));
+        return Column(
+          // mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Container(
+              child: views[0],
+              height: 350,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.fullscreen, color: Colors.green, size: 30),
+                  onPressed: () => _changeScreenRes(),
+                ),
+              ],
+            ),
+            Divider()
+          ],
+        );
+        break;
       case 2:
-        return Container(
-            child: Column(
-          children: <Widget>[
-            // _expandedVideoRow([views[0]]),
-            _expandedVideoRow([views[1]])
-          ],
-        ));
-      case 3:
-        return Container(
-            child: Column(
-          children: <Widget>[
-            _expandedVideoRow(views.sublist(0, 2)),
-            _expandedVideoRow(views.sublist(2, 3))
-          ],
-        ));
-      case 4:
-        return Container(
-            child: Column(
-          children: <Widget>[
-            _expandedVideoRow(views.sublist(0, 2)),
-            _expandedVideoRow(views.sublist(2, 4))
-          ],
-        ));
+        return isFullScreen == false
+            ? Column(
+                // mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Container(
+                    child: views[1],
+                    height: 350,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      IconButton(
+                        icon: Icon(Icons.fullscreen,
+                            color: Colors.green, size: 30),
+                        onPressed: () => _changeScreenRes(),
+                      ),
+                    ],
+                  ),
+                  Divider()
+                ],
+              )
+            : Expanded(child: Container(child: views[1]));
+
+        break;
+
       default:
     }
     return Container();
@@ -244,195 +253,170 @@ class _GoLiveState extends State<ViewLive> {
 
   /// Toolbar layout
   Widget _toolbar() {
-    return Container(
-      alignment: Alignment.bottomCenter,
-      padding: EdgeInsets.symmetric(vertical: 48),
-      child: chat == true
-          ? Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                RawMaterialButton(
-                  onPressed: () {
-                    _toggleChat();
-                  },
-                  child: new Icon(
-                    Icons.chat_bubble_outline,
-                    color: Colors.white,
-                    size: 30.0,
-                  ),
-                  shape: new CircleBorder(),
-                  elevation: 2.0,
-                  fillColor: Color(0xfffd6a02),
-                  padding: const EdgeInsets.all(15.0),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Expanded(
+            child: Padding(
+          padding: EdgeInsets.only(left: 10),
+          child: TextField(
+            controller: _msg,
+            decoration: new InputDecoration(
+                fillColor: Colors.white,
+                filled: true,
+                contentPadding: new EdgeInsets.fromLTRB(10.0, 30.0, 10.0, 10.0),
+                border: new OutlineInputBorder(
+                  borderRadius: new BorderRadius.circular(12.0),
                 ),
-                Expanded(
-                    child: Padding(
-                  padding: EdgeInsets.only(left: 10),
-                  child: TextField(
-                    onChanged: (val) {
-                      setState(() {
-                        msg = val;
-                        val = "";
-                      });
-                    },
-                    decoration: new InputDecoration(
-                        fillColor: Colors.white,
-                        filled: true,
-                        contentPadding:
-                            new EdgeInsets.fromLTRB(10.0, 30.0, 10.0, 10.0),
-                        border: new OutlineInputBorder(
-                          borderRadius: new BorderRadius.circular(12.0),
-                        ),
-                        hintText: 'Type here'),
-                  ),
-                )),
-                RawMaterialButton(
-                  onPressed: () {
-                    _sendMsg();
-                  },
-                  child: new Icon(
-                    Icons.send,
-                    color: Colors.white,
-                    size: 30.0,
-                  ),
-                  shape: new CircleBorder(),
-                  elevation: 2.0,
-                  fillColor: Color(0xfffd6a02),
-                  padding: const EdgeInsets.all(15.0),
-                ),
-              ],
-            )
-          : RawMaterialButton(
-              onPressed: () {
-                _toggleChat();
-              },
-              child: new Icon(
-                Icons.chat_bubble_outline,
-                color: Colors.white,
-                size: 30.0,
-              ),
-              shape: new CircleBorder(),
-              elevation: 2.0,
-              fillColor: Color(0xfffd6a02),
-              padding: const EdgeInsets.all(15.0),
-            ),
+                hintText: 'Type here'),
+          ),
+        )),
+        RawMaterialButton(
+          onPressed: () {
+            _sendMsg();
+          },
+          child: new Icon(
+            Icons.send,
+            color: Colors.white,
+            size: 30.0,
+          ),
+          shape: new CircleBorder(),
+          elevation: 2.0,
+          fillColor: Color(0xfffd6a02),
+          padding: const EdgeInsets.all(15.0),
+        ),
+      ],
     );
   }
 
 // Info panel to show logs
-  Widget _panel() {
-    return Container(
-        padding: EdgeInsets.symmetric(vertical: 48),
-        alignment: Alignment.bottomCenter,
-        child: FractionallySizedBox(
-          heightFactor: 0.5,
-          child: Container(
-              padding: EdgeInsets.symmetric(vertical: 48),
-              child: FirebaseAnimatedList(
-                query: FirebaseDatabase.instance
-                    .reference()
-                    .child('Msg')
-                    .orderByChild('msg_uid')
-                    .equalTo(widget.msgUid),
-                sort: (a, b) => b.key.compareTo(a.key),
-                padding: new EdgeInsets.all(8.0),
-                reverse: true,
-                itemBuilder: (_, DataSnapshot snapshot,
-                    Animation<double> animation, int) {
-                  return ListTile(
-                    title: Text(
-                      snapshot.value['name'],
-                      style: TextStyle(color: Color(0xfffd6a02)),
-                    ),
-                    subtitle: Text(snapshot.value['msg'],
-                        style: TextStyle(color: Colors.white)),
-                  );
-                },
-              )),
-        ));
+  Widget _comments() {
+    return Flexible(
+        child: StreamBuilder(
+      stream: Firestore.instance
+          .collection('Live')
+          .document(widget.docId)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Container();
+        }
+        // DocumentSnapshot ds = snapshot.data.document;
+        print(snapshot.data['comments'].length);
+        return ListView.builder(
+            padding: EdgeInsets.all(10),
+            itemCount: snapshot.data['comments'].length,
+            itemBuilder: (context, index) {
+              _color = _randomColor.randomColor();
+              ;
+              return ListTile(
+                title: Text(
+                  snapshot.data['comments'][index]['name'],
+                  style: TextStyle(color: _color, fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  snapshot.data['comments'][index]['msg'],
+                  style: TextStyle(color: Colors.black),
+                ),
+              );
+            });
+      },
+    ));
   }
-
-  // void _onCallEnd(BuildContext context) {
-  //   Navigator.pop(context);
-  // }
 
   void _sendMsg() async {
+    if (userName == "") return;
     final FirebaseAuth _auth = FirebaseAuth.instance;
     FirebaseUser user = await _auth.currentUser();
-    final reference = FirebaseDatabase.instance.reference().child('Msg');
-    reference.push().set({
-      'msg': msg,
-      'name': "Sarthak",
-      'msg_uid': widget.msgUid,
-      'sender_uid': user.uid,
-      'time': new DateTime.now().millisecondsSinceEpoch,
+    Firestore.instance.collection('Live').document(widget.docId).updateData({
+      'comments': FieldValue.arrayUnion([
+        {
+          'msg': _msg.text,
+          'name': userName,
+          'sender_uid': user.uid,
+          'time': new DateTime.now()
+        }
+      ])
     }).then((onValue) {
-      print("send");
+      _msg.clear();
     });
   }
 
-  void _updateLive() {
+  void _updateLive() async {
+    bool _viewed = false;
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+    FirebaseUser user = await _auth.currentUser();
     Firestore.instance
         .collection('Live')
         .where('msg_uid', isEqualTo: widget.msgUid)
         .getDocuments()
         .then((querySnapshot) {
       querySnapshot.documents.forEach((doc) {
-        Firestore.instance
-            .collection('Live')
-            .document(doc.documentID)
-            .updateData({
-          'viewers': doc['viewers'] + 1,
-          'total_viewers': doc['total_viewers'] + 1
-        }).then((onValue) {
-          print('done');
-        });
+        for (int i = 0; i < doc['viewers'].length; i++) {
+          if (doc['viewers'][i] == user.uid) _viewed = true;
+        }
+
+        if (!_viewed) {
+          Firestore.instance
+              .collection('Live')
+              .document(doc.documentID)
+              .updateData({
+            'viewers': FieldValue.arrayUnion([user.uid])
+          }).then((onValue) {
+            print('done');
+          });
+        }
       });
     });
   }
 
-  void _removeLive() {
-    Firestore.instance
-        .collection('Live')
-        .where('msg_uid', isEqualTo: widget.msgUid)
-        .getDocuments()
-        .then((querySnapshot) {
-      querySnapshot.documents.forEach((doc) {
-        Firestore.instance
-            .collection('Live')
-            .document(doc.documentID)
-            .updateData({
-          'viewers': doc['viewers'] - 1,
-        }).then((onValue) {
-          print('done');
-        });
-      });
-    });
-  }
-
-  void _toggleChat() {
-    if (chat == true) {
+  void _loadUserName() async {
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+    FirebaseUser user = await _auth.currentUser();
+    Firestore.instance.collection("Users").document(user.uid).get().then((doc) {
       setState(() {
-        chat = false;
+        userName = doc.data['username'];
+      });
+    });
+  }
+
+  void _changeScreenRes() {
+    print("back pressed");
+    if (isFullScreen == false) {
+      setState(() {
+        isFullScreen = true;
       });
     } else {
       setState(() {
-        chat = true;
+        isFullScreen = false;
       });
+    }
+    print(isFullScreen);
+  }
+
+  _onBackPressed() {
+    if (isFullScreen) {
+      setState(() {
+        isFullScreen = false;
+      });
+    } else {
+      Navigator.pop(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
-            child: chat == true
-                ? Stack(
-                    children: <Widget>[_viewRows(), _panel(), _toolbar()],
-                  )
-                : Stack(
-                    children: <Widget>[_viewRows(), _toolbar()],
-                  )));
+    return WillPopScope(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Column(
+          children: isFullScreen == false
+              ? <Widget>[_viewRowsHalfScreen(), _comments(), _toolbar()]
+              : <Widget>[_viewRowsHalfScreen()],
+        ),
+        // bottomNavigationBar: _toolbar(),
+      ),
+      onWillPop: () => _onBackPressed(),
+    );
   }
 }

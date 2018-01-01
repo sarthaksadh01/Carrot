@@ -171,9 +171,7 @@ public class MainActivity extends FlutterActivity {
               public void onJoinChannelSuccess(String channel, int uid, int elapsed) {
                 Log.d(LOG_TAG, "onJoinChannelSuccess " + channel + " " + elapsed);
 
-                mSocket.connect();
-
-                // mSocket.emit("LiveUser", "hello");
+        
               }
 
               @Override

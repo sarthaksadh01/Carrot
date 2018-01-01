@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:direct_select/direct_select.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flare_flutter/flare_actor.dart';
 // import 'package:permission_handler/permission_handler.dart';
 import './golive.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -163,7 +164,12 @@ class _AddDescFullState extends State<AddDescFull> {
               ),
             ]))
           : Center(
-              child: CircularProgressIndicator(),
+              child: FlareActor(
+                "assets/flare/loading.flr",
+                alignment: Alignment.center,
+                fit: BoxFit.contain,
+                animation: "Untitled",
+              ),
             ),
       bottomNavigationBar: MaterialButton(
         height: 45,
