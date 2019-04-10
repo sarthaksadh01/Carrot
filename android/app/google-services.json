@@ -1,0 +1,35 @@
+{
+  "project_info": {
+    "project_number": "181064667908",
+    "firebase_url": "https://simosa-f04fd.firebaseio.com",
+    "project_id": "simosa-f04fd",
+    "storage_bucket": "simosa-f04fd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:181064667908:android:297c94d7bb39edfd",
+        "android_client_info": {
+          "package_name": "com.example.simosa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGVXETic5SwaecG704xPMkKdEido-ALAI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "181064667908-m03mfeqd78as8p45m1pmntck08pra27i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
