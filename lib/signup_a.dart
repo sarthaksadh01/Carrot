@@ -4,15 +4,6 @@ import './signup_b.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class SignupA extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: SignupAFull(),
-    );
-  }
-}
-
 class SignupAFull extends StatefulWidget {
   @override
   _SignupAFullState createState() => _SignupAFullState();
@@ -31,7 +22,6 @@ class _SignupAFullState extends State<SignupAFull> {
               padding: EdgeInsets.all(10),
               child: GoogleSignInButton(onPressed: () {
                 _googleSignIn();
-        
               }),
             ),
             Padding(
@@ -59,12 +49,13 @@ class _SignupAFullState extends State<SignupAFull> {
           textColor: Colors.white,
           fontSize: 16.0);
     }).whenComplete(() {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                SignupB(user.displayName, user.email, user.photoUrl)),
-      );
+      Navigator.of(context).pushReplacement(new MaterialPageRoute(
+          settings: const RouteSettings(name: '/SignUpB'),
+          builder: (context) => new SignupBFull(
+                email: user.email,
+                name: user.displayName,
+                photo: user.displayName,
+              )));
     });
   }
 }

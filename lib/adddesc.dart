@@ -158,7 +158,7 @@ class _AddDescFullState extends State<AddDescFull> {
       context,
       MaterialPageRoute(
           builder: (context) => GoLive(
-                channelName: "HLpsTtcBKNbaoJXOw7tcl8WuQPP2",
+                channelName: user.uid,
                 category: elements1[selectedIndex1],
                 hashtags: tags,
               )),

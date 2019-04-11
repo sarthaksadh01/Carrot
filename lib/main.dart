@@ -7,26 +7,28 @@ import './main_pages//home.dart';
 import './main_pages/private.dart';
 import './adddesc.dart';
 import './splashscreen.dart';
-
+import './login.dart';
+import './signup_a.dart';
+import './signup_b.dart';
 
 void main() {
-
-    runApp(MaterialApp(
+  runApp(MaterialApp(
     title: 'Simosa',
     // Start the app with the "/" named route. In our case, the app will start
     // on the FirstScreen Widget
     initialRoute: '/',
     routes: {
-      // When we navigate to the "/" route, build the FirstScreen Widget
-      '/': (context) => MyHomePage(),
-      // When we navigate to the "/second" route, build the SecondScreen Widget
+      '/': (context) => SplashFull(),
+      '/Home': (context) => MyHomePage(),
+       '/Login': (context) => LoginFull(),
       '/Profile': (context) => Profile(),
       '/AddDesc': (context) => AddDescFull(),
+      '/SignUpA':(context) => SignupAFull(),
+      '/SignUpB':(context) => SignupBFull(),
+      
     },
   ));
-
 }
-
 
 // class MyApp extends StatelessWidget {
 //   @override
@@ -96,7 +98,9 @@ class _MyHomePageState extends State<MyHomePage> {
         body: currentPage,
         floatingActionButton: FloatingActionButton(
             backgroundColor: Color(0xfffd6a02),
-            onPressed: () {add();},
+            onPressed: () {
+              add();
+            },
             child: Icon(Icons.add_circle)),
         bottomNavigationBar: FancyBottomNavigation(
           circleColor: Color(0xfffd6a02),
@@ -121,17 +125,16 @@ class _MyHomePageState extends State<MyHomePage> {
     showDialog(
         context: context,
         builder: (context) => SingleChoiceConfirmationDialog<String>(
-          actionButtonLabelColor:Color(0xfffd6a02) ,
-          activeColor: Color(0xfffd6a02),
+            actionButtonLabelColor: Color(0xfffd6a02),
+            activeColor: Color(0xfffd6a02),
             title: Text('Select Option'),
-        
             items: ['Screen Recorder', 'Camera'],
             // onSelected: ,
             onSubmitted: (val) {
               setState(() {
                 addOption = val;
-                if(val=="Camera"){
-                   Navigator.pushNamed(context,'/AddDesc');
+                if (val == "Camera") {
+                  Navigator.pushNamed(context, '/AddDesc');
                 }
               });
             }));

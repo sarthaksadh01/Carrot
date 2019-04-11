@@ -1,17 +1,6 @@
 import 'package:flutter/material.dart';
-import './main.dart';
-import './signup_a.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
-class Login extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: LoginFull(),
-    );
-  }
-}
 
 class LoginFull extends StatefulWidget {
   @override
@@ -74,10 +63,7 @@ class _LoginState extends State<LoginFull> {
                 padding: EdgeInsets.all(10),
                 child: InkWell(
                   onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => SignupA()),
-                    );
+                   Navigator.pushReplacementNamed(context, '/SignUpA');
                   },
                   child: Text(
                     "Create new Account?",
@@ -118,10 +104,7 @@ class _LoginState extends State<LoginFull> {
         .signInWithEmailAndPassword(
             email: email.trim(), password: password.trim())
         .then((FirebaseUser user) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MyHomePage()),
-      );
+      Navigator.pushReplacementNamed(context, '/Home');
     }).catchError((e) {
       Fluttertoast.showToast(
           msg: e.toString(),

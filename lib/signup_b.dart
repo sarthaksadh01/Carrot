@@ -6,20 +6,10 @@ import 'package:phone_auth_simple/phone_auth_simple.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-class SignupB extends StatelessWidget {
-  final String name, email, photo;
-  SignupB(this.name, this.email, this.photo);
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: SignupBFull(name, email, photo),
-    );
-  }
-}
-
 class SignupBFull extends StatefulWidget {
   final String name, email, photo;
-  SignupBFull(this.name, this.email, this.photo);
+  const SignupBFull({Key key,this.name, this.email, this.photo})
+ : super(key: key);
   @override
   _SignupBFullState createState() => _SignupBFullState(name, email, photo);
 }

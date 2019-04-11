@@ -1,16 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import './main.dart';
-import './login.dart';
 
-class SplashScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: SplashFull(),
-    );
-  }
-}
 
 class SplashFull extends StatefulWidget {
   @override
@@ -38,17 +28,11 @@ class _SplashFullState extends State<SplashFull> {
     FirebaseUser user = await _auth.currentUser();
     if (user == null) {
       Future.delayed(const Duration(milliseconds: 2000), () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Login()),
-        );
+      Navigator.pushReplacementNamed(context, '/Login');
       });
     } else {
       Future.delayed(const Duration(milliseconds: 2000), () {
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => X()),
-        // );
+        Navigator.pushReplacementNamed(context, '/Home');
       });
     }
   }
