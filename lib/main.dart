@@ -30,26 +30,6 @@ void main() {
   ));
 }
 
-// class MyApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       title: 'Simosa',
-//       theme: ThemeData(
-//         primarySwatch: Colors.blue,
-//       ),
-//       initialRoute: '/',
-//       routes: <String, WidgetBuilder>{
-//         '/':(context) => MyHomePage(),
-//         '/Profile': (BuildContext context) => Profile(),
-//         '/hi': (BuildContext context) => AddDescFull(),
-
-//       },
-//     );
-//   }
-// }
-
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 

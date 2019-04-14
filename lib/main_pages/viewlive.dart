@@ -1,15 +1,17 @@
 import 'dart:async';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import './agora_utils/videosession.dart';
 import './agora_utils/settings.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ViewLive extends StatefulWidget {
-  final String channelName;
+  final String channelName, msgUid;
 
   /// Creates a call page with given channel name.
-  const ViewLive({Key key, this.channelName})
-      : super(key: key);
+  const ViewLive({Key key, this.channelName, this.msgUid}) : super(key: key);
 
   @override
   _GoLiveState createState() {
@@ -21,6 +23,7 @@ class _GoLiveState extends State<ViewLive> {
   static final _sessions = List<VideoSession>();
   final _infoStrings = <String>[];
   bool muted = false;
+  String msg;
 
   @override
   void dispose() {
@@ -37,6 +40,7 @@ class _GoLiveState extends State<ViewLive> {
   void initState() {
     super.initState();
     // initialize agora sdk
+    print(widget.msgUid);
     initialize();
   }
 
@@ -80,7 +84,6 @@ class _GoLiveState extends State<ViewLive> {
 
     AgoraRtcEngine.onJoinChannelSuccess =
         (String channel, int uid, int elapsed) {
-
       setState(() {
         String info = "Yo Are Live";
         _infoStrings.add(info);
@@ -222,42 +225,41 @@ class _GoLiveState extends State<ViewLive> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          RawMaterialButton(
-            onPressed: () => _onToggleMute(),
-            child: new Icon(
-              muted ? Icons.mic : Icons.mic_off,
-              color: muted ? Colors.white : Colors.blueAccent,
-              size: 20.0,
+          Expanded(
+              child: Padding(
+            padding: EdgeInsets.only(left: 10),
+            child: TextField(
+              onChanged: (val) {
+                setState(() {
+                  msg = val;
+                  val = "";
+                });
+              },
+              decoration: new InputDecoration(
+                  fillColor: Colors.white,
+                  filled: true,
+                  contentPadding:
+                      new EdgeInsets.fromLTRB(10.0, 30.0, 10.0, 10.0),
+                  border: new OutlineInputBorder(
+                    borderRadius: new BorderRadius.circular(12.0),
+                  ),
+                  hintText: 'Type here'),
             ),
-            shape: new CircleBorder(),
-            elevation: 2.0,
-            fillColor: muted ? Colors.blueAccent : Colors.white,
-            padding: const EdgeInsets.all(12.0),
-          ),
+          )),
           RawMaterialButton(
-            onPressed: () => _onCallEnd(context),
+            onPressed: () {
+              _sendMsg();
+            },
             child: new Icon(
-              Icons.videocam_off,
+              Icons.send,
               color: Colors.white,
-              size: 35.0,
+              size: 30.0,
             ),
             shape: new CircleBorder(),
             elevation: 2.0,
-            fillColor: Colors.redAccent,
+            fillColor: Color(0xfffd6a02),
             padding: const EdgeInsets.all(15.0),
           ),
-          RawMaterialButton(
-            onPressed: () => _onSwitchCamera(),
-            child: new Icon(
-              Icons.switch_camera,
-              color: Colors.blueAccent,
-              size: 20.0,
-            ),
-            shape: new CircleBorder(),
-            elevation: 2.0,
-            fillColor: Colors.white,
-            padding: const EdgeInsets.all(12.0),
-          )
         ],
       ),
     );
@@ -272,60 +274,59 @@ class _GoLiveState extends State<ViewLive> {
           heightFactor: 0.5,
           child: Container(
               padding: EdgeInsets.symmetric(vertical: 48),
-              child: ListView.builder(
-                  reverse: true,
-                  itemCount: _infoStrings.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    if (_infoStrings.length == 0) {
-                      return null;
-                    }
-                    return Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 3, horizontal: 10),
-                        child: Row(mainAxisSize: MainAxisSize.min, children: [
-                          Flexible(
-                              child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 2, horizontal: 5),
-                                  decoration: BoxDecoration(
-                                      color: Color(0xfffd6a02),
-                                      borderRadius: BorderRadius.circular(5)),
-                                  child: Text(_infoStrings[index],
-                                      style:
-                                          TextStyle(color: Colors.blueGrey))))
-                        ]));
-                  })),
+              child: FirebaseAnimatedList(
+                query: FirebaseDatabase.instance
+                    .reference()
+                    .child('Msg')
+                    .orderByChild('msg_uid')
+                    .equalTo(widget.msgUid),
+                sort: (a, b) => b.key.compareTo(a.key),
+                padding: new EdgeInsets.all(8.0),
+                reverse: true,
+                itemBuilder: (_, DataSnapshot snapshot,
+                    Animation<double> animation, int) {
+                  return ListTile(
+                    title: Text(
+                      snapshot.value['name'],
+                      style: TextStyle(color: Color(0xfffd6a02)),
+                    ),
+                    subtitle: Text(snapshot.value['msg'],
+                        style: TextStyle(color: Colors.white)),
+                  );
+                },
+              )),
         ));
   }
 
-  void _onCallEnd(BuildContext context) {
-    Navigator.pop(context);
-  }
+  // void _onCallEnd(BuildContext context) {
+  //   Navigator.pop(context);
+  // }
 
-  void _onToggleMute() {
-    setState(() {
-      muted = !muted;
+  void _sendMsg() async {
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+    FirebaseUser user = await _auth.currentUser();
+    final reference = FirebaseDatabase.instance.reference().child('Msg');
+    reference.push().set({
+      'msg': msg,
+      'name': "Sarthak",
+      'msg_uid': widget.msgUid,
+      'sender_uid': user.uid,
+      'time': new DateTime.now().millisecondsSinceEpoch,
+    }).then((onValue) {
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => MyHomePage()),
+      // );
     });
-    AgoraRtcEngine.muteLocalAudioStream(muted);
-  }
-
-  void _onSwitchCamera() {
-    AgoraRtcEngine.switchCamera();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Color(0xfffd6a02),
-          title: Text("Live"),
-        ),
         backgroundColor: Colors.black,
         body: Center(
             child: Stack(
-          children: <Widget>[_viewRows()],
+          children: <Widget>[_viewRows(), _panel(), _toolbar()],
         )));
   }
-
-
 }

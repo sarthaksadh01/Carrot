@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import './agora_utils/videosession.dart';
 import './agora_utils/settings.dart';
+import 'package:random_string/random_string.dart';
+
 
 class GoLive extends StatefulWidget {
   final String channelName, category, hashtags;
@@ -330,13 +332,16 @@ class _GoLiveState extends State<GoLive> {
 
   _updateDatabase() {
     final reference = FirebaseDatabase.instance.reference().child('Live');
+    String msg_uid = widget.channelName + randomString(10);
 
     reference.push().set({
       'category': widget.category,
       'uid': widget.channelName,
+      'msg_uid': msg_uid,
       'hashtags': widget.hashtags,
       'viewers': '0',
-      'time': new DateTime.now().millisecondsSinceEpoch
+      'time': new DateTime.now().millisecondsSinceEpoch,
+      'status': 'online'
     }).then((onValue) {
       // Navigator.pushReplacement(
       //   context,

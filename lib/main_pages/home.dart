@@ -25,6 +25,7 @@ class _State extends State<Home> {
       MaterialPageRoute(
           builder: (context) => ViewLive(
             channelName: snapshot.value['uid'],
+            msgUid: snapshot.value['msg_uid'],
           )
               ),
     );

@@ -38,6 +38,7 @@ dev_dependencies:
   easy_dialogs: ^1.0.0
   direct_select: ^1.0.0
   agora_rtc_engine: ^0.9.4
+  random_string: ^0.0.2
   
   
   
