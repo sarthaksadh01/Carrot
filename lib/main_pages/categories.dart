@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-
+import './subcategory.dart';
 
 class Categories extends StatefulWidget {
   @override
@@ -18,39 +18,48 @@ class _State extends State<Categories> {
       setState(() {
         values = snapshot.value;
         values.forEach((key, values) {
-          catgr.add(Card(
-              elevation: 1.5,
-              child: Container(
-                  width: MediaQuery.of(context).size.width / 1.8,
-                  height: 300,
-                  child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Column(
-                      children: <Widget>[
-                        Image.network(
-                          values,
-                          height: 230,
-                          width: MediaQuery.of(context).size.width / 2.2,
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 5),
-                        ),
-                        Text(
-                          key,
-                          style: TextStyle(
-                              color: Color(0xfffd6a02),
-                              fontWeight: FontWeight.bold),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 5),
-                        ),
-                        Text(
-                          "82.7k viewers",
-                          style: TextStyle(fontWeight: FontWeight.w300),
-                        ),
-                      ],
-                    ),
-                  ))));
+          catgr.add(InkWell(
+            onTap: () {
+              Navigator.of(context).push(new MaterialPageRoute(
+                  settings: const RouteSettings(name: '/SignUpB'),
+                  builder: (context) => new SubCategoryFull(
+                        sub: key,
+                      )));
+            },
+            child: Card(
+                elevation: 1.5,
+                child: Container(
+                    width: MediaQuery.of(context).size.width / 1.8,
+                    height: 300,
+                    child: Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Column(
+                        children: <Widget>[
+                          Image.network(
+                            values,
+                            height: 230,
+                            width: MediaQuery.of(context).size.width / 2.2,
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(top: 5),
+                          ),
+                          Text(
+                            key,
+                            style: TextStyle(
+                                color: Color(0xfffd6a02),
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(top: 5),
+                          ),
+                          Text(
+                            "82.7k viewers",
+                            style: TextStyle(fontWeight: FontWeight.w300),
+                          ),
+                        ],
+                      ),
+                    ))),
+          ));
         });
       });
     });
@@ -73,6 +82,5 @@ class _State extends State<Categories> {
               backgroundColor: Color(0xfffd6a02),
             ),
           );
-
   }
 }

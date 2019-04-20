@@ -3,6 +3,7 @@ import 'package:direct_select/direct_select.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:permission_handler/permission_handler.dart';
 import './golive.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class AddDescFull extends StatefulWidget {
   @override
@@ -23,6 +24,7 @@ class _AddDescFullState extends State<AddDescFull> {
     "Misc"
   ];
   int selectedIndex1 = 0;
+  String title = "";
 
   List<Widget> _buildItems1() {
     return elements1
@@ -62,6 +64,21 @@ class _AddDescFullState extends State<AddDescFull> {
               });
             },
             items: _buildItems1()),
+        Padding(
+          padding: EdgeInsets.fromLTRB(30, 20, 30, 10),
+          child: TextField(
+            onChanged: (val) {
+              setState(() {
+                title = val;
+              });
+            },
+            decoration: new InputDecoration(
+                prefixIcon: Icon(Icons.calendar_today),
+                hintText: "Enter Title",
+                border: new OutlineInputBorder(
+                    borderSide: new BorderSide(color: Colors.teal))),
+          ),
+        ),
         Padding(
             padding: EdgeInsets.fromLTRB(30, 20, 30, 10),
             child: Row(
@@ -145,6 +162,17 @@ class _AddDescFullState extends State<AddDescFull> {
   }
 
   _golive() async {
+    if(title.trim()==""){
+      Fluttertoast.showToast(
+          msg: "Title cannot be empty!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIos: 1,
+          backgroundColor: Color(0xfffd6a02),
+          textColor: Colors.white,
+          fontSize: 16.0);
+      return;
+    }
     // await _handleCameraAndMic();
     final FirebaseAuth _auth = FirebaseAuth.instance;
     FirebaseUser user = await _auth.currentUser();
@@ -161,6 +189,7 @@ class _AddDescFullState extends State<AddDescFull> {
                 channelName: user.uid,
                 category: elements1[selectedIndex1],
                 hashtags: tags,
+                title: title.trim(),
               )),
     );
   }

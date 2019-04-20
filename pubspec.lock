@@ -158,6 +158,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
+  pit_carousel:
+    dependency: "direct dev"
+    description:
+      name: pit_carousel
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.1"
   quiver:
     dependency: transitive
     description:

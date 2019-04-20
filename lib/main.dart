@@ -10,12 +10,11 @@ import './splashscreen.dart';
 import './login.dart';
 import './signup_a.dart';
 import './signup_b.dart';
+import './main_pages/subcategory.dart';
 
 void main() {
   runApp(MaterialApp(
     title: 'Simosa',
-    // Start the app with the "/" named route. In our case, the app will start
-    // on the FirstScreen Widget
     initialRoute: '/',
     routes: {
       '/': (context) => SplashFull(),
@@ -25,6 +24,7 @@ void main() {
       '/AddDesc': (context) => AddDescFull(),
       '/SignUpA':(context) => SignupAFull(),
       '/SignUpB':(context) => SignupBFull(),
+      '/Sub':(context)=>SubCategoryFull()
       
     },
   ));

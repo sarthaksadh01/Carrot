@@ -17,8 +17,9 @@ class _SplashFullState extends State<SplashFull> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xfffd6a02),
       body: Center(
-        child: Image.asset("assets/images/logo.png", height: 250),
+        child: Image.asset("assets/images/logo.png", height: MediaQuery.of(context).size.height,width: MediaQuery.of(context).size.width,),
       ),
     );
   }
@@ -31,7 +32,7 @@ class _SplashFullState extends State<SplashFull> {
       Navigator.pushReplacementNamed(context, '/Login');
       });
     } else {
-      Future.delayed(const Duration(milliseconds: 2000), () {
+      Future.delayed(const Duration(milliseconds: 5000), () {
         Navigator.pushReplacementNamed(context, '/Home');
       });
     }

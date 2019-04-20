@@ -6,12 +6,11 @@ import './agora_utils/videosession.dart';
 import './agora_utils/settings.dart';
 import 'package:random_string/random_string.dart';
 
-
 class GoLive extends StatefulWidget {
-  final String channelName, category, hashtags;
+  final String channelName, category, hashtags,title;
 
   /// Creates a call page with given channel name.
-  const GoLive({Key key, this.channelName, this.category, this.hashtags})
+  const GoLive({Key key, this.channelName, this.category, this.hashtags,this.title})
       : super(key: key);
 
   @override
@@ -24,6 +23,7 @@ class _GoLiveState extends State<GoLive> {
   static final _sessions = List<VideoSession>();
   final _infoStrings = <String>[];
   bool muted = false;
+  String msg_uid;
 
   @override
   void dispose() {
@@ -32,6 +32,7 @@ class _GoLiveState extends State<GoLive> {
       AgoraRtcEngine.removeNativeView(session.viewId);
     });
     _sessions.clear();
+    _leaveChanel();
     AgoraRtcEngine.leaveChannel();
     super.dispose();
   }
@@ -92,7 +93,7 @@ class _GoLiveState extends State<GoLive> {
 
     AgoraRtcEngine.onLeaveChannel = () {
       setState(() {
-        // _infoStrings.add('onLeaveChannel');
+        _leaveChanel();
       });
     };
 
@@ -302,6 +303,7 @@ class _GoLiveState extends State<GoLive> {
   }
 
   void _onCallEnd(BuildContext context) {
+    _leaveChanel();
     Navigator.pop(context);
   }
 
@@ -331,22 +333,42 @@ class _GoLiveState extends State<GoLive> {
   }
 
   _updateDatabase() {
-    final reference = FirebaseDatabase.instance.reference().child('Live');
-    String msg_uid = widget.channelName + randomString(10);
-
-    reference.push().set({
+    print(widget.title);
+    msg_uid = widget.channelName + randomString(10);
+    final reference =
+        FirebaseDatabase.instance.reference().child('Live').child(msg_uid);
+    reference.set({
       'category': widget.category,
       'uid': widget.channelName,
       'msg_uid': msg_uid,
       'hashtags': widget.hashtags,
       'viewers': '0',
       'time': new DateTime.now().millisecondsSinceEpoch,
-      'status': 'online'
+      'status': 'online',
+      'title':widget.title
     }).then((onValue) {
       // Navigator.pushReplacement(
       //   context,
       //   MaterialPageRoute(builder: (context) => MyHomePage()),
       // );
     });
+    _onDisconnect();
+  }
+
+  _leaveChanel() {
+    final reference =
+        FirebaseDatabase.instance.reference().child('Live').child(msg_uid);
+    reference.update({'status': 'offline'}).then((onValue) {
+      print('offline');
+    });
+  }
+
+  _onDisconnect(){
+    final reference =
+        FirebaseDatabase.instance.reference().child('Live').child(msg_uid);
+        reference.onDisconnect().update({'status':'offline'}).then((onValue){
+          print('offline');
+
+        });
   }
 }

@@ -23,6 +23,7 @@ class _GoLiveState extends State<ViewLive> {
   static final _sessions = List<VideoSession>();
   final _infoStrings = <String>[];
   bool muted = false;
+  bool chat=true;
   String msg;
 
   @override
@@ -222,9 +223,23 @@ class _GoLiveState extends State<ViewLive> {
     return Container(
       alignment: Alignment.bottomCenter,
       padding: EdgeInsets.symmetric(vertical: 48),
-      child: Row(
+      child: chat==true?Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
+          RawMaterialButton(
+            onPressed: () {
+              _toggleChat();
+            },
+            child: new Icon(
+              Icons.chat_bubble_outline,
+              color: Colors.white,
+              size: 30.0,
+            ),
+            shape: new CircleBorder(),
+            elevation: 2.0,
+            fillColor: Color(0xfffd6a02),
+            padding: const EdgeInsets.all(15.0),
+          ),
           Expanded(
               child: Padding(
             padding: EdgeInsets.only(left: 10),
@@ -261,7 +276,20 @@ class _GoLiveState extends State<ViewLive> {
             padding: const EdgeInsets.all(15.0),
           ),
         ],
-      ),
+      ): RawMaterialButton(
+            onPressed: () {
+              _toggleChat();
+            },
+            child: new Icon(
+              Icons.chat_bubble_outline,
+              color: Colors.white,
+              size: 30.0,
+            ),
+            shape: new CircleBorder(),
+            elevation: 2.0,
+            fillColor: Color(0xfffd6a02),
+            padding: const EdgeInsets.all(15.0),
+          ),
     );
   }
 
@@ -320,13 +348,40 @@ class _GoLiveState extends State<ViewLive> {
     });
   }
 
+  void _updateLive() {}
+  void _toggleChat(){
+
+    if(chat==true){
+      setState(() {
+        chat=false;
+      });
+    }
+    else{
+      setState(() {
+        chat=true;
+      });
+    }
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.black,
         body: Center(
-            child: Stack(
-          children: <Widget>[_viewRows(), _panel(), _toolbar()],
-        )));
+            child: chat==true?Stack(
+          children: <Widget>[
+            _viewRows(), _panel(), _toolbar()]
+            
+            ,
+        ):Stack(
+          children: <Widget>[
+            _viewRows(), _toolbar()]
+            
+            ,
+        )
+        
+        )
+        );
   }
 }
