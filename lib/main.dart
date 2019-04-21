@@ -11,21 +11,28 @@ import './login.dart';
 import './signup_a.dart';
 import './signup_b.dart';
 import './main_pages/subcategory.dart';
+import './golive_screen.dart';
+
 
 void main() {
   runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(
+      primaryColor: Color(0xfffd6a02),
+      accentColor: Color(0xfffd6a02)
+    ),
     title: 'Simosa',
     initialRoute: '/',
     routes: {
       '/': (context) => SplashFull(),
       '/Home': (context) => MyHomePage(),
-       '/Login': (context) => LoginFull(),
+      '/Login': (context) => LoginFull(),
       '/Profile': (context) => Profile(),
       '/AddDesc': (context) => AddDescFull(),
-      '/SignUpA':(context) => SignupAFull(),
-      '/SignUpB':(context) => SignupBFull(),
-      '/Sub':(context)=>SubCategoryFull()
-      
+      '/SignUpA': (context) => SignupAFull(),
+      '/SignUpB': (context) => SignupBFull(),
+      '/Sub': (context) => SubCategoryFull(),
+      '/ScreenRecord': (context) => ScreenRecord(),
     },
   ));
 }
@@ -101,6 +108,8 @@ class _MyHomePageState extends State<MyHomePage> {
         ));
   }
 
+ 
+
   void add() {
     showDialog(
         context: context,
@@ -114,9 +123,25 @@ class _MyHomePageState extends State<MyHomePage> {
               setState(() {
                 addOption = val;
                 if (val == "Camera") {
-                  Navigator.pushNamed(context, '/AddDesc');
+                  Navigator.of(context).push(new MaterialPageRoute(
+                      settings: const RouteSettings(name: '/AddDesc'),
+                      builder: (context) => new AddDescFull(
+                            media: "Camera",
+                          )));
+
+                  // Navigator.pushNamed(context, '/AddDesc');
+                } else {
+                   Navigator.of(context).push(new MaterialPageRoute(
+                      settings: const RouteSettings(name: '/AddDesc'),
+                      builder: (context) => new AddDescFull(
+                            media: "ScreenRecord",
+                          )));
+
+                  // _startScreenShare();
                 }
               });
             }));
   }
+
+  
 }

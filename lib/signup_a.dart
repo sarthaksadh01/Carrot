@@ -13,24 +13,27 @@ class _SignupAFullState extends State<SignupAFull> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Image.asset("assets/images/logo.png", height: 250),
-            Padding(
+            Image.asset("assets/images/logob.png", height: 250),
+           
+            // Padding(
+            //   padding: EdgeInsets.all(10),
+            //   child: FacebookSignInButton(onPressed: () {}),
+            // ),
+          ],
+        ),
+
+      ),
+      bottomNavigationBar:  Padding(
               padding: EdgeInsets.all(10),
               child: GoogleSignInButton(onPressed: () {
                 _googleSignIn();
               }),
             ),
-            Padding(
-              padding: EdgeInsets.all(10),
-              child: FacebookSignInButton(onPressed: () {}),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -49,6 +52,7 @@ class _SignupAFullState extends State<SignupAFull> {
           textColor: Colors.white,
           fontSize: 16.0);
     }).whenComplete(() {
+      if(user==null)return;
       Navigator.of(context).pushReplacement(new MaterialPageRoute(
           settings: const RouteSettings(name: '/SignUpB'),
           builder: (context) => new SignupBFull(

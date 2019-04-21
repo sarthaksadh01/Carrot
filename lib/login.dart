@@ -10,14 +10,17 @@ class LoginFull extends StatefulWidget {
 class _LoginState extends State<LoginFull> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String email = "", password = "";
+  bool loading = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: ListView(
+          shrinkWrap: true,
+          // mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Image.asset('assets/images/logo.png', height: 250),
+            Image.asset('assets/images/logob.png', height: 250),
             Padding(
                 padding: EdgeInsets.fromLTRB(30, 20, 30, 10),
                 child: TextField(
@@ -49,27 +52,38 @@ class _LoginState extends State<LoginFull> {
                 )),
             Padding(
                 padding: EdgeInsets.all(10),
-                child: RaisedButton(
+                child: MaterialButton(
+                  height: 45,
+                  
                   color: Color(0xfffd6a02),
-                  child: Text(
-                    "Login",
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  child: loading != true
+                      ? Text(
+                          "Login",
+                          style: TextStyle(color: Colors.white),
+                        )
+                      : CircularProgressIndicator(
+                     
+                          valueColor: new AlwaysStoppedAnimation<Color>(Colors.white,),
+                        ),
                   onPressed: () {
-                    login();
+                    if (!loading) login();
                   },
                 )),
-            Padding(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+              Padding(
                 padding: EdgeInsets.all(10),
                 child: InkWell(
                   onTap: () {
-                   Navigator.pushReplacementNamed(context, '/SignUpA');
+                    Navigator.pushReplacementNamed(context, '/SignUpA');
                   },
                   child: Text(
                     "Create new Account?",
                     style: TextStyle(color: Colors.blue),
                   ),
-                )),
+                ))
+            ],),
           ],
         ),
       ),
@@ -99,6 +113,9 @@ class _LoginState extends State<LoginFull> {
           fontSize: 16.0);
       return;
     }
+    setState(() {
+      loading=true;
+    });
 
     await _auth
         .signInWithEmailAndPassword(
@@ -106,6 +123,9 @@ class _LoginState extends State<LoginFull> {
         .then((FirebaseUser user) {
       Navigator.pushReplacementNamed(context, '/Home');
     }).catchError((e) {
+      setState(() {
+        loading=false;
+      });
       Fluttertoast.showToast(
           msg: e.toString(),
           toastLength: Toast.LENGTH_SHORT,

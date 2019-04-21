@@ -4,8 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:permission_handler/permission_handler.dart';
 import './golive.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import './golive_screen.dart';
 
 class AddDescFull extends StatefulWidget {
+  final String media;
+  AddDescFull({this.media});
   @override
   _AddDescFullState createState() => _AddDescFullState();
 }
@@ -162,7 +165,7 @@ class _AddDescFullState extends State<AddDescFull> {
   }
 
   _golive() async {
-    if(title.trim()==""){
+    if (title.trim() == "") {
       Fluttertoast.showToast(
           msg: "Title cannot be empty!",
           toastLength: Toast.LENGTH_SHORT,
@@ -182,16 +185,27 @@ class _AddDescFullState extends State<AddDescFull> {
       tags += hash[i];
       tags += " ";
     }
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => GoLive(
+    if (widget.media == "Camera") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => GoLive(
+                  channelName: user.uid,
+                  category: elements1[selectedIndex1],
+                  hashtags: tags.trim(),
+                  title: title.trim(),
+                )),
+      );
+    } else {
+      Navigator.of(context).push(new MaterialPageRoute(
+          settings: const RouteSettings(name: '/ScreenRecord'),
+          builder: (context) => new ScreenRecord(
                 channelName: user.uid,
                 category: elements1[selectedIndex1],
-                hashtags: tags,
+                hashtags: tags.trim(),
                 title: title.trim(),
-              )),
-    );
+              )));
+    }
   }
 
   // _handleCameraAndMic() async {

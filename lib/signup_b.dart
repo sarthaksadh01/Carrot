@@ -41,7 +41,7 @@ class _SignupBFullState extends State<SignupBFull> {
                 Padding(
                   padding: EdgeInsets.only(top: 15),
                   child: Image.asset(
-                    "assets/images/logo.png",
+                    "assets/images/logob.png",
                     height: 200,
                   ),
                 ),
