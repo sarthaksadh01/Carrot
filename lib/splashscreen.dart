@@ -32,7 +32,7 @@ class _SplashFullState extends State<SplashFull> {
       Navigator.pushReplacementNamed(context, '/Login');
       });
     } else {
-      Future.delayed(const Duration(milliseconds: 5000), () {
+      Future.delayed(const Duration(milliseconds: 3000), () {
         Navigator.pushReplacementNamed(context, '/Home');
       });
     }
