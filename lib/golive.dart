@@ -7,10 +7,11 @@ import 'package:random_string/random_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GoLive extends StatefulWidget {
-  final String channelName, category, hashtags,title;
+  final String channelName, category, hashtags, title;
 
   /// Creates a call page with given channel name.
-  const GoLive({Key key, this.channelName, this.category, this.hashtags,this.title})
+  const GoLive(
+      {Key key, this.channelName, this.category, this.hashtags, this.title})
       : super(key: key);
 
   @override
@@ -42,6 +43,7 @@ class _GoLiveState extends State<GoLive> {
     super.initState();
     // initialize agora sdk
     initialize();
+    // s _leaveChanel();
   }
 
   void initialize() {
@@ -111,6 +113,7 @@ class _GoLiveState extends State<GoLive> {
       setState(() {
         String info = 'userOffline: ' + uid.toString();
         // _infoStrings.add(info);
+        // _leaveChanel();
         _removeRenderView(uid);
       });
     };
@@ -340,37 +343,48 @@ class _GoLiveState extends State<GoLive> {
       'uid': widget.channelName,
       'msg_uid': msg_uid,
       'hashtags': widget.hashtags,
-      'viewers':0,
-      'total_viewers':0,
+      'viewers': 0,
+      'total_viewers': 0,
       'time': new DateTime.now().millisecondsSinceEpoch,
       'status': 'online',
-      'title':widget.title
-      }).then((onValue) {
-        // Navigator.pushReplacementNamed(context, '/Home');
-      }).catchError((e) {
-  
-      });
-    _onDisconnect();
+      'title': widget.title
+    }).then((onValue) {
+      // Navigator.pushReplacementNamed(context, '/Home');
+    }).catchError((e) {});
+    // _onDisconnect();
   }
 
   _leaveChanel() {
-
-      //TODO
-  //  Firestore.instance.collection('Live').where('msg_uid',isEqualTo:msg_uid)..snapshots().listen(
-  //         (data) {
-
-  //         }
-  //   );
+    Firestore.instance
+        .collection('Live')
+        .where('msg_uid', isEqualTo: msg_uid)
+        .getDocuments()
+        .then((querySnapshot) {
+      querySnapshot.documents.forEach((doc) {
+        Firestore.instance
+            .collection('Live')
+            .document(doc.documentID)
+            .updateData({'status': 'offline'}).then((onValue) {
+          print('done');
+        });
+      });
+    });
   }
 
-  _onDisconnect(){
-
-    //TODO
-    // final reference =
-    //     FirebaseDatabase.instance.reference().child('Live').child(msg_uid);
-    //     reference.onDisconnect().update({'status':'offline'}).then((onValue){
-    //       print('offline');
-
-    //     });
+  _onDisconnect() {
+    Firestore.instance
+        .collection('Live')
+        .where('msg_uid', isEqualTo: msg_uid)
+        .getDocuments()
+        .then((querySnapshot) {
+      querySnapshot.documents.forEach((doc) {
+        Firestore.instance
+            .collection('Live')
+            .document(doc.documentID)
+            .updateData({'status': 'offline'}).then((onValue) {
+          print('done');
+        });
+      });
+    });
   }
 }

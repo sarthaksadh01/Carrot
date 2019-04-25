@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import './agora_utils/videosession.dart';
 import './agora_utils/settings.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ViewLive extends StatefulWidget {
   final String channelName, msgUid;
@@ -23,7 +24,7 @@ class _GoLiveState extends State<ViewLive> {
   static final _sessions = List<VideoSession>();
   final _infoStrings = <String>[];
   bool muted = false;
-  bool chat=true;
+  bool chat = true;
   String msg;
 
   @override
@@ -33,6 +34,7 @@ class _GoLiveState extends State<ViewLive> {
       AgoraRtcEngine.removeNativeView(session.viewId);
     });
     _sessions.clear();
+    _removeLive();
     AgoraRtcEngine.leaveChannel();
     super.dispose();
   }
@@ -88,13 +90,12 @@ class _GoLiveState extends State<ViewLive> {
       setState(() {
         String info = "You Are Live";
         _infoStrings.add(info);
+        _updateLive();
       });
     };
 
     AgoraRtcEngine.onLeaveChannel = () {
-      setState(() {
-        // _infoStrings.add('onLeaveChannel');
-      });
+      _removeLive();
     };
 
     AgoraRtcEngine.onUserJoined = (int uid, int elapsed) {
@@ -112,6 +113,7 @@ class _GoLiveState extends State<ViewLive> {
         String info = 'userOffline: ' + uid.toString();
         // _infoStrings.add(info);
         _removeRenderView(uid);
+        _removeLive();
       });
     };
 
@@ -223,73 +225,75 @@ class _GoLiveState extends State<ViewLive> {
     return Container(
       alignment: Alignment.bottomCenter,
       padding: EdgeInsets.symmetric(vertical: 48),
-      child: chat==true?Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          RawMaterialButton(
-            onPressed: () {
-              _toggleChat();
-            },
-            child: new Icon(
-              Icons.chat_bubble_outline,
-              color: Colors.white,
-              size: 30.0,
-            ),
-            shape: new CircleBorder(),
-            elevation: 2.0,
-            fillColor: Color(0xfffd6a02),
-            padding: const EdgeInsets.all(15.0),
-          ),
-          Expanded(
-              child: Padding(
-            padding: EdgeInsets.only(left: 10),
-            child: TextField(
-              onChanged: (val) {
-                setState(() {
-                  msg = val;
-                  val = "";
-                });
-              },
-              decoration: new InputDecoration(
-                  fillColor: Colors.white,
-                  filled: true,
-                  contentPadding:
-                      new EdgeInsets.fromLTRB(10.0, 30.0, 10.0, 10.0),
-                  border: new OutlineInputBorder(
-                    borderRadius: new BorderRadius.circular(12.0),
+      child: chat == true
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                RawMaterialButton(
+                  onPressed: () {
+                    _toggleChat();
+                  },
+                  child: new Icon(
+                    Icons.chat_bubble_outline,
+                    color: Colors.white,
+                    size: 30.0,
                   ),
-                  hintText: 'Type here'),
+                  shape: new CircleBorder(),
+                  elevation: 2.0,
+                  fillColor: Color(0xfffd6a02),
+                  padding: const EdgeInsets.all(15.0),
+                ),
+                Expanded(
+                    child: Padding(
+                  padding: EdgeInsets.only(left: 10),
+                  child: TextField(
+                    onChanged: (val) {
+                      setState(() {
+                        msg = val;
+                        val = "";
+                      });
+                    },
+                    decoration: new InputDecoration(
+                        fillColor: Colors.white,
+                        filled: true,
+                        contentPadding:
+                            new EdgeInsets.fromLTRB(10.0, 30.0, 10.0, 10.0),
+                        border: new OutlineInputBorder(
+                          borderRadius: new BorderRadius.circular(12.0),
+                        ),
+                        hintText: 'Type here'),
+                  ),
+                )),
+                RawMaterialButton(
+                  onPressed: () {
+                    _sendMsg();
+                  },
+                  child: new Icon(
+                    Icons.send,
+                    color: Colors.white,
+                    size: 30.0,
+                  ),
+                  shape: new CircleBorder(),
+                  elevation: 2.0,
+                  fillColor: Color(0xfffd6a02),
+                  padding: const EdgeInsets.all(15.0),
+                ),
+              ],
+            )
+          : RawMaterialButton(
+              onPressed: () {
+                _toggleChat();
+              },
+              child: new Icon(
+                Icons.chat_bubble_outline,
+                color: Colors.white,
+                size: 30.0,
+              ),
+              shape: new CircleBorder(),
+              elevation: 2.0,
+              fillColor: Color(0xfffd6a02),
+              padding: const EdgeInsets.all(15.0),
             ),
-          )),
-          RawMaterialButton(
-            onPressed: () {
-              _sendMsg();
-            },
-            child: new Icon(
-              Icons.send,
-              color: Colors.white,
-              size: 30.0,
-            ),
-            shape: new CircleBorder(),
-            elevation: 2.0,
-            fillColor: Color(0xfffd6a02),
-            padding: const EdgeInsets.all(15.0),
-          ),
-        ],
-      ): RawMaterialButton(
-            onPressed: () {
-              _toggleChat();
-            },
-            child: new Icon(
-              Icons.chat_bubble_outline,
-              color: Colors.white,
-              size: 30.0,
-            ),
-            shape: new CircleBorder(),
-            elevation: 2.0,
-            fillColor: Color(0xfffd6a02),
-            padding: const EdgeInsets.all(15.0),
-          ),
     );
   }
 
@@ -341,27 +345,59 @@ class _GoLiveState extends State<ViewLive> {
       'sender_uid': user.uid,
       'time': new DateTime.now().millisecondsSinceEpoch,
     }).then((onValue) {
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => MyHomePage()),
-      // );
+    print("send");
     });
   }
 
-  void _updateLive() {}
-  void _toggleChat(){
+  void _updateLive() {
+    Firestore.instance
+        .collection('Live')
+        .where('msg_uid', isEqualTo: widget.msgUid)
+        .getDocuments()
+        .then((querySnapshot) {
+      querySnapshot.documents.forEach((doc) {
+        Firestore.instance
+            .collection('Live')
+            .document(doc.documentID)
+            .updateData({
+          'viewers': doc['viewers'] + 1,
+          'total_viewers': doc['total_viewers'] + 1
+        }).then((onValue) {
+          print('done');
+        });
+      });
+    });
+  }
 
-    if(chat==true){
+  void _removeLive() {
+    Firestore.instance
+        .collection('Live')
+        .where('msg_uid', isEqualTo: widget.msgUid)
+        .getDocuments()
+        .then((querySnapshot) {
+      querySnapshot.documents.forEach((doc) {
+        Firestore.instance
+            .collection('Live')
+            .document(doc.documentID)
+            .updateData({
+          'viewers': doc['viewers'] - 1,
+        }).then((onValue) {
+          print('done');
+        });
+      });
+    });
+  }
+
+  void _toggleChat() {
+    if (chat == true) {
       setState(() {
-        chat=false;
+        chat = false;
+      });
+    } else {
+      setState(() {
+        chat = true;
       });
     }
-    else{
-      setState(() {
-        chat=true;
-      });
-    }
-
   }
 
   @override
@@ -369,19 +405,12 @@ class _GoLiveState extends State<ViewLive> {
     return Scaffold(
         backgroundColor: Colors.black,
         body: Center(
-            child: chat==true?Stack(
-          children: <Widget>[
-            _viewRows(), _panel(), _toolbar()]
-            
-            ,
-        ):Stack(
-          children: <Widget>[
-            _viewRows(), _toolbar()]
-            
-            ,
-        )
-        
-        )
-        );
+            child: chat == true
+                ? Stack(
+                    children: <Widget>[_viewRows(), _panel(), _toolbar()],
+                  )
+                : Stack(
+                    children: <Widget>[_viewRows(), _toolbar()],
+                  )));
   }
 }
