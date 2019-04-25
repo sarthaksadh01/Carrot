@@ -86,7 +86,7 @@ class _GoLiveState extends State<ViewLive> {
     AgoraRtcEngine.onJoinChannelSuccess =
         (String channel, int uid, int elapsed) {
       setState(() {
-        String info = "Yo Are Live";
+        String info = "You Are Live";
         _infoStrings.add(info);
       });
     };

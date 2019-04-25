@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_database/ui/firebase_animated_list.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import './viewlive.dart';
 
 class SubCategoryFull extends StatefulWidget {
   final String sub;
@@ -13,55 +13,106 @@ class _SubCategoryFullState extends State<SubCategoryFull> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.sub),
-      backgroundColor: Color(0xfffd6a02),),
-      body: FirebaseAnimatedList(
-      query: FirebaseDatabase.instance
-          .reference()
-          .child("Live")
-          .orderByChild('category')
-          .equalTo(widget.sub),
-      sort: (a, b) => b.key.compareTo(a.key),
-      padding: new EdgeInsets.all(8.0),
-      itemBuilder:
-          (_, DataSnapshot snapshot, Animation<double> animation, int) {
-        return new Card(
-            elevation: 1.5,
-            child: Container(
-                width: MediaQuery.of(context).size.width / 1.2,
-                height: 300,
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Column(
-                    children: <Widget>[
-                      Image.network(
-                        'https://cdn.pixabay.com/photo/2016/10/27/22/53/heart-1776746_960_720.jpg',
-                        height: 230,
-                        width: MediaQuery.of(context).size.width / 1.2,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: 5),
-                      ),
-                      Text(
-                        snapshot.value['title'],
-                        // cat,
-                        style: TextStyle(
-                            color: Color(0xfffd6a02),
-                            fontWeight: FontWeight.bold),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: 5),
-                      ),
-                      Text(
-                        snapshot.value['hashtags'],
-                        // sub,
-                        style: TextStyle(fontWeight: FontWeight.w300),
-                      ),
-                    ],
-                  ),
-                )));
-      },
-    ),
+      appBar: AppBar(title: Text(widget.sub),),
+      body: StreamBuilder(
+          stream: Firestore.instance
+              .collection('Live')
+              .where('status', isEqualTo: 'online').where('category',isEqualTo:widget.sub)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return new CircularProgressIndicator(
+                valueColor: new AlwaysStoppedAnimation<Color>(
+                  Color(0xfffd6a02),
+                ),
+              );
+            }
+
+            return ListView.builder(
+                itemCount: snapshot.data.documents.length,
+                itemBuilder: (context, index) {
+                  DocumentSnapshot ds = snapshot.data.documents[index];
+                  return Card(
+                    semanticContainer: true,
+                    clipBehavior: Clip.antiAliasWithSaveLayer,
+                    child: Column(
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                "Sarthak Sadh",
+                                style: TextStyle(
+                                    fontSize: 17, color: Color(0xfffd6a02)),
+                              ),
+                            ),
+                            Spacer(),
+                            IconButton(
+                              icon: Icon(
+                                Icons.add,
+                                color: Color(0xfffd6a02),
+                              ),
+                              onPressed: null,
+                            )
+                          ],
+                        ),
+                        Divider(),
+                        InkWell(
+                          onTap: () {
+                             Navigator.of(context).push(new MaterialPageRoute(
+                                settings:
+                                    const RouteSettings(name: '/ViewLive'),
+                                builder: (context) => new ViewLive(
+                                      channelName: ds['uid'],
+                                      msgUid: ds['msg_uid'],
+                                    )));
+                          },
+                          child: Stack(
+                            children: <Widget>[
+                              Image.asset(
+                                'assets/images/logob.png',
+                                height: 100,
+                               
+                                fit: BoxFit.fill,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                "${ds['title']} | ${ds['category']}",
+                                style: TextStyle(
+                                    fontSize: 14, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                "${ds['hashtags']}",
+                                style: TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.w300),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    elevation: 5,
+                    margin: EdgeInsets.all(10),
+                  );
+                });
+          }),
     );
   }
 }

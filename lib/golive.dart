@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
 import './agora_utils/videosession.dart';
 import './agora_utils/settings.dart';
 import 'package:random_string/random_string.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GoLive extends StatefulWidget {
   final String channelName, category, hashtags,title;
@@ -335,40 +335,42 @@ class _GoLiveState extends State<GoLive> {
   _updateDatabase() {
     print(widget.title);
     msg_uid = widget.channelName + randomString(10);
-    final reference =
-        FirebaseDatabase.instance.reference().child('Live').child(msg_uid);
-    reference.set({
+    Firestore.instance.collection('Live').add({
       'category': widget.category,
       'uid': widget.channelName,
       'msg_uid': msg_uid,
       'hashtags': widget.hashtags,
-      'viewers': '0',
+      'viewers':0,
+      'total_viewers':0,
       'time': new DateTime.now().millisecondsSinceEpoch,
       'status': 'online',
       'title':widget.title
-    }).then((onValue) {
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => MyHomePage()),
-      // );
-    });
+      }).then((onValue) {
+        // Navigator.pushReplacementNamed(context, '/Home');
+      }).catchError((e) {
+  
+      });
     _onDisconnect();
   }
 
   _leaveChanel() {
-    final reference =
-        FirebaseDatabase.instance.reference().child('Live').child(msg_uid);
-    reference.update({'status': 'offline'}).then((onValue) {
-      print('offline');
-    });
+
+      //TODO
+  //  Firestore.instance.collection('Live').where('msg_uid',isEqualTo:msg_uid)..snapshots().listen(
+  //         (data) {
+
+  //         }
+  //   );
   }
 
   _onDisconnect(){
-    final reference =
-        FirebaseDatabase.instance.reference().child('Live').child(msg_uid);
-        reference.onDisconnect().update({'status':'offline'}).then((onValue){
-          print('offline');
 
-        });
+    //TODO
+    // final reference =
+    //     FirebaseDatabase.instance.reference().child('Live').child(msg_uid);
+    //     reference.onDisconnect().update({'status':'offline'}).then((onValue){
+    //       print('offline');
+
+    //     });
   }
 }

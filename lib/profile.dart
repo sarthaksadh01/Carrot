@@ -26,7 +26,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
       body: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
-            title: Text("Profile"),
+            actions: <Widget>[Icon(Icons.add)],
+            // centerTitle:true ,
+             title: Text("Profile"),
             expandedHeight: 250,
             floating: false,
             pinned: true,

@@ -3,7 +3,7 @@ import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:easy_dialogs/easy_dialogs.dart';
 import './profile.dart';
 import './main_pages/categories.dart';
-import './main_pages//home.dart';
+import './main_pages/home.dart';
 import './main_pages/private.dart';
 import './adddesc.dart';
 import './splashscreen.dart';
@@ -12,6 +12,7 @@ import './signup_a.dart';
 import './signup_b.dart';
 import './main_pages/subcategory.dart';
 import './golive_screen.dart';
+import './main_pages/viewlive.dart';
 
 
 void main() {
@@ -33,6 +34,7 @@ void main() {
       '/SignUpB': (context) => SignupBFull(),
       '/Sub': (context) => SubCategoryFull(),
       '/ScreenRecord': (context) => ScreenRecord(),
+      '/ViewLive':(context)=>ViewLive()
     },
   ));
 }
