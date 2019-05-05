@@ -19,9 +19,11 @@ class _State extends State<Categories> {
               .snapshots(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
-              return new CircularProgressIndicator(
-                valueColor: new AlwaysStoppedAnimation<Color>(
-                  Color(0xfffd6a02),
+              return Center(
+                child: new CircularProgressIndicator(
+                  valueColor: new AlwaysStoppedAnimation<Color>(
+                    Color(0xfffd6a02),
+                  ),
                 ),
               );
             }

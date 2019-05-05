@@ -7,11 +7,11 @@ import 'package:random_string/random_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GoLive extends StatefulWidget {
-  final String channelName, category, hashtags, title;
+  final String channelName, category, hashtags, title, username;
 
   /// Creates a call page with given channel name.
   const GoLive(
-      {Key key, this.channelName, this.category, this.hashtags, this.title})
+      {Key key, this.channelName, this.category, this.hashtags, this.title,this.username})
       : super(key: key);
 
   @override
@@ -341,6 +341,7 @@ class _GoLiveState extends State<GoLive> {
     Firestore.instance.collection('Live').add({
       'category': widget.category,
       'uid': widget.channelName,
+      'username':widget.username,
       'msg_uid': msg_uid,
       'hashtags': widget.hashtags,
       'viewers': 0,

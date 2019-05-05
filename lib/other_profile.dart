@@ -1,27 +1,29 @@
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class Profile extends StatefulWidget {
+class OtherProfile extends StatefulWidget {
+  OtherProfile({this.fullName, this.uid});
+  final String fullName, uid;
   @override
-  _ProfileState createState() => _ProfileState();
+  _OtherProfileState createState() => _OtherProfileState();
 }
 
-class _ProfileState extends State<Profile> {
+class _OtherProfileState extends State<OtherProfile> {
   int _followers = 0;
   int _uploads = 0;
   int _level = 0;
   bool loading = true;
+  bool _isFollowing = false;
+  bool followLoading = true;
   FirebaseAuth auth;
   // =
   FirebaseUser user;
-  String userUid;
   // =
   @override
   void initState() {
+    _loadUser();
     _loadData();
-
     super.initState();
   }
 
@@ -106,53 +108,74 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget _profileData() {
-    return StreamBuilder(
-        stream: Firestore.instance
-            .collection('Users')
-            .document(user.uid)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return new CircularProgressIndicator(
-              valueColor: new AlwaysStoppedAnimation<Color>(
-                Colors.white,
+  Widget _buildButtons() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: InkWell(
+              onTap: _isFollowing
+                  ? () {
+                      _unfollow();
+                    }
+                  : () {
+                      _follow();
+                    },
+              child: Container(
+                height: 40.0,
+                decoration: BoxDecoration(
+                  border: Border.all(),
+                  color: Color(0xfffd6a02),
+                ),
+                child: Center(
+                  child: _isFollowing
+                      ? followLoading == false
+                          ? Text(
+                              "UNFOLLOW",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            )
+                          : CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),)
+                      : followLoading == false
+                          ? Text(
+                              "FOLLOW",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            )
+                          : CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),),
+                ),
               ),
-            );
-          }
-          var userDocument = snapshot.data;
-
-          return new Column(
-            children: <Widget>[
-              ListTile(
-                leading: Icon(Icons.portrait, color: Color(0xfffd6a02)),
-                title: Text("Username"),
-                subtitle: Text(userDocument["username"]),
+            ),
+          ),
+          SizedBox(width: 10.0),
+          Expanded(
+            child: InkWell(
+              onTap: () => print("Message"),
+              child: Container(
+                height: 40.0,
+                decoration: BoxDecoration(
+                  border: Border.all(),
+                ),
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Text(
+                      "DONATE",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
               ),
-              ListTile(
-                leading: Icon(Icons.email, color: Color(0xfffd6a02)),
-                title: Text("Email"),
-                subtitle: Text(userDocument["email"]),
-              ),
-              ListTile(
-                leading: Icon(Icons.phone, color: Color(0xfffd6a02)),
-                title: Text("Phone Number"),
-                subtitle: Text(userDocument["phone"]),
-              ),
-              ListTile(
-                leading: Icon(Icons.blur_circular, color: Color(0xfffd6a02)),
-                title: Text("Gender"),
-                subtitle: Text(userDocument["gender"]),
-              ),
-              ListTile(
-                leading: Icon(Icons.account_balance_wallet,
-                    color: Color(0xfffd6a02)),
-                title: Text("Wallet"),
-                subtitle: Text("0"),
-              ),
-            ],
-          );
-        });
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -161,8 +184,7 @@ class _ProfileState extends State<Profile> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "profile",
-          // widget.fullName,
+          widget.fullName,
           style: TextStyle(color: Colors.black),
         ),
         backgroundColor: Colors.transparent,
@@ -178,7 +200,6 @@ class _ProfileState extends State<Profile> {
                         SizedBox(height: screenSize.height / 6.4),
                         _buildProfileImage(),
                         _buildStatContainer(),
-                        _profileData()
                       ],
                     ),
                   ),
@@ -188,15 +209,19 @@ class _ProfileState extends State<Profile> {
           : Center(
               child: CircularProgressIndicator(),
             ),
+      bottomNavigationBar: _buildButtons(),
     );
   }
 
-  _loadData() async {
+  _loadUser() async {
     auth = FirebaseAuth.instance;
     user = await auth.currentUser();
+  }
+
+  _loadData() {
     Firestore.instance
         .collection('Live')
-        .where('uid', isEqualTo: user.uid)
+        .where('uid', isEqualTo: widget.uid)
         .getDocuments()
         .then((docs) {
       docs.documents.forEach((doc) {
@@ -207,15 +232,59 @@ class _ProfileState extends State<Profile> {
 
       Firestore.instance
           .collection('Users')
-          .document(user.uid)
+          .document(widget.uid)
           .get()
           .then((doc) {
         List<String> flwrs = List.from(doc.data['followers']);
+        for (int i = 0; i < flwrs.length; i++) {
+          if (flwrs[i] == user.uid) {
+            setState(() {
+              _isFollowing = true;
+            });
+          }
+        }
         setState(() {
           _followers = flwrs.length;
           loading = false;
+           followLoading = false;
         });
       });
     });
+  }
+
+  _unfollow() {
+    setState(() {
+      followLoading = true;
+    });
+    List<String> by = [widget.uid];
+    Firestore.instance
+        .collection('Users')
+        .document(user.uid)
+        .updateData({'followers': FieldValue.arrayRemove(by)}).then((onValue) {
+      setState(() {
+        followLoading = false;
+        _isFollowing = false;
+        _followers--;
+      });
+    });
+  }
+
+  _follow() async {
+    setState(() {
+      followLoading = true;
+    });
+    List<dynamic> by = [widget.uid];
+    Firestore.instance
+        .collection('Users')
+        .document(user.uid)
+        .updateData({'followers': FieldValue.arrayUnion(by)}).then((onValue) {
+      setState(() {
+        followLoading = false;
+        _isFollowing = true;
+        _followers++;
+      });
+    });
+
+    print("follow called");
   }
 }

@@ -287,7 +287,8 @@ class _SignupBFullState extends State<SignupBFull> {
         'gender': gender,
         'pic': photo,
         'time': new DateTime.now().millisecondsSinceEpoch,
-        'level': 1
+        'level': 1,
+        'followers':FieldValue.arrayUnion([])
       }).then((onValue) {
         Navigator.pushReplacementNamed(context, '/Home');
       }).catchError((e) {

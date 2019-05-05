@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:easy_dialogs/easy_dialogs.dart';
+import 'package:loader_search_bar/loader_search_bar.dart';
+import './comments.dart';
 import './profile.dart';
 import './main_pages/categories.dart';
 import './main_pages/home.dart';
@@ -13,15 +15,13 @@ import './signup_b.dart';
 import './main_pages/subcategory.dart';
 import './golive_screen.dart';
 import './main_pages/viewlive.dart';
-
+import './other_profile.dart';
 
 void main() {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
     theme: ThemeData(
-      primaryColor: Color(0xfffd6a02),
-      accentColor: Color(0xfffd6a02)
-    ),
+        primaryColor: Color(0xfffd6a02), accentColor: Color(0xfffd6a02)),
     title: 'Simosa',
     initialRoute: '/',
     routes: {
@@ -34,7 +34,10 @@ void main() {
       '/SignUpB': (context) => SignupBFull(),
       '/Sub': (context) => SubCategoryFull(),
       '/ScreenRecord': (context) => ScreenRecord(),
-      '/ViewLive':(context)=>ViewLive()
+      '/ViewLive': (context) => ViewLive(),
+      '/Apps': (context) => ListAppsPages(),
+      '/OtherProfile': (context) => OtherProfile()
+      
     },
   ));
 }
@@ -64,12 +67,12 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
+        appBar: SearchBar(
+          searchHint: 'Search here',
+            defaultBar: AppBar(
           leading: Icon(Icons.games),
           backgroundColor: Color(0xfffd6a02),
-          title: TextField(
-              decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search), hintText: "Search")),
+          title:Text("Carrot"),
           actions: <Widget>[
             Padding(
                 padding: EdgeInsets.all(5),
@@ -83,6 +86,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 ))
           ],
+        ),
+        onQuerySubmitted: (query){}
         ),
         body: currentPage,
         floatingActionButton: FloatingActionButton(
@@ -110,8 +115,6 @@ class _MyHomePageState extends State<MyHomePage> {
         ));
   }
 
- 
-
   void add() {
     showDialog(
         context: context,
@@ -133,17 +136,20 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   // Navigator.pushNamed(context, '/AddDesc');
                 } else {
-                   Navigator.of(context).push(new MaterialPageRoute(
-                      settings: const RouteSettings(name: '/AddDesc'),
-                      builder: (context) => new AddDescFull(
-                            media: "ScreenRecord",
-                          )));
+                  _getApps();
+                  //  Navigator.of(context).push(new MaterialPageRoute(
+                  //     settings: const RouteSettings(name: '/AddDesc'),
+                  //     builder: (context) => new AddDescFull(
+                  //           media: "ScreenRecord",
+                  //         )));
 
-                  // _startScreenShare();
+                  // // _startScreenShare();
                 }
               });
             }));
   }
 
-  
+  _getApps() {
+    Navigator.of(context).pushNamed('/Apps');
+  }
 }

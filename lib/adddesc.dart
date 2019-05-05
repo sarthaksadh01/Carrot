@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:direct_select/direct_select.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:permission_handler/permission_handler.dart';
 import './golive.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -28,6 +29,7 @@ class _AddDescFullState extends State<AddDescFull> {
   ];
   int selectedIndex1 = 0;
   String title = "";
+  String userName = "";
 
   List<Widget> _buildItems1() {
     return elements1
@@ -176,36 +178,41 @@ class _AddDescFullState extends State<AddDescFull> {
           fontSize: 16.0);
       return;
     }
-    // await _handleCameraAndMic();
-    final FirebaseAuth _auth = FirebaseAuth.instance;
-    FirebaseUser user = await _auth.currentUser();
-
     String tags = "";
     for (int i = 0; i < hash.length; i++) {
       tags += hash[i];
       tags += " ";
     }
-    if (widget.media == "Camera") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => GoLive(
+    // await _handleCameraAndMic();
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+    FirebaseUser user = await _auth.currentUser();
+    Firestore.instance.collection('Users').document(user.uid).get().then((doc) {
+      setState(() {
+        userName = doc.data['username'];
+      });
+
+      if (widget.media == "Camera") {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => GoLive(
                   channelName: user.uid,
                   category: elements1[selectedIndex1],
                   hashtags: tags.trim(),
                   title: title.trim(),
-                )),
-      );
-    } else {
-      Navigator.of(context).push(new MaterialPageRoute(
-          settings: const RouteSettings(name: '/ScreenRecord'),
-          builder: (context) => new ScreenRecord(
-                channelName: user.uid,
-                category: elements1[selectedIndex1],
-                hashtags: tags.trim(),
-                title: title.trim(),
-              )));
-    }
+                  username: userName)),
+        );
+      } else {
+        Navigator.of(context).push(new MaterialPageRoute(
+            settings: const RouteSettings(name: '/ScreenRecord'),
+            builder: (context) => new ScreenRecord(
+                  channelName: user.uid,
+                  category: elements1[selectedIndex1],
+                  hashtags: tags.trim(),
+                  title: title.trim(),
+                )));
+      }
+    });
   }
 
   // _handleCameraAndMic() async {

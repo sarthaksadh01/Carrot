@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import './viewlive.dart';
-import '../other_profile.dart';
-import 'dart:ui';
+import './main_pages/viewlive.dart';
 
-class Home extends StatefulWidget {
+class Search extends StatefulWidget {
+  final String search;
+  Search({this.search});
   @override
-  _State createState() => _State();
+  _SearchState createState() => _SearchState();
 }
 
-class _State extends State<Home> {
+class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.search),
+      ),
       body: StreamBuilder(
           stream: Firestore.instance
               .collection('Live')
@@ -41,33 +43,22 @@ class _State extends State<Home> {
                       children: <Widget>[
                         Row(
                           children: <Widget>[
-                            InkWell(
-                              onTap: () async {
-                                FirebaseAuth auth = FirebaseAuth.instance;
-                                FirebaseUser user = await auth.currentUser();
-                                if (user.uid == ds['uid']) {
-                                  Navigator.of(context).pushNamed('/Profile');
-                                } else {
-                                  Navigator.of(context).push(
-                                      new MaterialPageRoute(
-                                          settings: const RouteSettings(
-                                              name: '/OtherProfile'),
-                                          builder: (context) =>
-                                              new OtherProfile(
-                                                uid: ds['uid'],
-                                                fullName: ds['username'],
-                                              )));
-                                }
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  ds['username'],
-                                  style: TextStyle(
-                                      fontSize: 17, color: Color(0xfffd6a02)),
-                                ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                "Sarthak Sadh",
+                                style: TextStyle(
+                                    fontSize: 17, color: Color(0xfffd6a02)),
                               ),
                             ),
+                            Spacer(),
+                            IconButton(
+                              icon: Icon(
+                                Icons.add,
+                                color: Color(0xfffd6a02),
+                              ),
+                              onPressed: null,
+                            )
                           ],
                         ),
                         Divider(),
