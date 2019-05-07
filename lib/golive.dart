@@ -7,7 +7,8 @@ import 'package:random_string/random_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GoLive extends StatefulWidget {
-  final String channelName, category, hashtags, title, username;
+  final String channelName, category, title, username;
+  final List<String> hashtags;
 
   /// Creates a call page with given channel name.
   const GoLive(

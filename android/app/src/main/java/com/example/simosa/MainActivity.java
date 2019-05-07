@@ -27,32 +27,6 @@ public class MainActivity extends FlutterActivity {
 
                   if (call.method.equals("startScreenShare")) {
 
-                      MyInterface myInterface = new MyInterface() {
-                          @Override
-                          public int describeContents() {
-                              return 0;
-                          }
-
-                          @Override
-                          public void writeToParcel(Parcel parcel, int i) {
-
-                          }
-
-                          @Override
-                          public void join(String s) {
-                              result.success(s);
-                          }
-
-                          @Override
-                          public void error(String s) {
-                              result.success(s);
-                          }
-
-                          @Override
-                          public void leave(String s) {
-                              result.success(s);
-                          }
-                      } ;
                       Intent intent = new Intent(MainActivity.this , HelloAgoraScreenSharingActivity.class);
 
                       startActivity(intent);

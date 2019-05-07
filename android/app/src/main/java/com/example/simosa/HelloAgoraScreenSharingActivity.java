@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.MediaRecorder;
 import android.os.Bundle;
 
 import android.util.DisplayMetrics;
@@ -22,6 +23,7 @@ import io.agora.rtc.ss.ImgTexFrame;
 import io.agora.rtc.ss.SinkConnector;
 import io.agora.rtc.ss.capture.ScreenCapture;
 import io.agora.rtc.video.AgoraVideoFrame;
+import io.agora.rtc.video.VideoEncoderConfiguration;
 
 public class HelloAgoraScreenSharingActivity extends Activity {
 
@@ -135,7 +137,10 @@ public class HelloAgoraScreenSharingActivity extends Activity {
             }
 
             mRtcEngine.setChannelProfile(Constants.CHANNEL_PROFILE_LIVE_BROADCASTING);
+//            static final VideoEncoderConfiguration.VideoDimensions VD_1280x720 = new VideoEncoderConfiguration.VideoDimensions(1280, 720)
+//            mRtcEngine.setVideoEncoderConfiguration(VideoDimensions.);
             mRtcEngine.enableVideo();
+
 
             if (mRtcEngine.isTextureEncodeSupported()) {
                 mRtcEngine.setExternalVideoSource(true, true, true);

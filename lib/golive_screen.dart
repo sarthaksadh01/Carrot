@@ -2,7 +2,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
 class ScreenRecord extends StatefulWidget {
-  final String channelName, category, hashtags, title;
+  final String channelName, category, title;
+  final List<String> hashtags;
   const ScreenRecord(
       {Key key, this.channelName, this.category, this.hashtags, this.title})
       : super(key: key);

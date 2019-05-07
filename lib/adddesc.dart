@@ -105,7 +105,7 @@ class _AddDescFullState extends State<AddDescFull> {
                     onPressed: () {
                       setState(() {
                         if (hashtagscntrl.text.trim() != null)
-                          hash.add("#" + hashtagscntrl.text);
+                          hash.add("#" + hashtagscntrl.text.toLowerCase());
                         hashtagscntrl.text = "";
                       });
                     },
@@ -131,10 +131,15 @@ class _AddDescFullState extends State<AddDescFull> {
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
                           children: <Widget>[
-                            Text(
-                              hash[index],
-                              style: TextStyle(
-                                  fontSize: 22.0, color: Color(0xfffd6a02)),
+                            Flexible(
+                              child: Container(
+                                child: Text(
+                                  hash[index],
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: 22.0, color: Color(0xfffd6a02)),
+                                ),
+                              ),
                             ),
                             Spacer(),
                             IconButton(
@@ -178,10 +183,13 @@ class _AddDescFullState extends State<AddDescFull> {
           fontSize: 16.0);
       return;
     }
-    String tags = "";
-    for (int i = 0; i < hash.length; i++) {
-      tags += hash[i];
-      tags += " ";
+    List<String> hashAndTitle = [];
+    hashAndTitle.addAll(hash);
+    hashAndTitle.add("sarthak@sid@monga@carrot@simosa");
+    hashAndTitle.add("#" + elements1[selectedIndex1].toLowerCase());
+    List<String> tempTitle = title.split(" ");
+    for (int i = 0; i < tempTitle.length; i++) {
+      hashAndTitle.add("#" + tempTitle[i].toLowerCase());
     }
     // await _handleCameraAndMic();
     final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -198,7 +206,7 @@ class _AddDescFullState extends State<AddDescFull> {
               builder: (context) => GoLive(
                   channelName: user.uid,
                   category: elements1[selectedIndex1],
-                  hashtags: tags.trim(),
+                  hashtags: hashAndTitle,
                   title: title.trim(),
                   username: userName)),
         );
@@ -208,7 +216,7 @@ class _AddDescFullState extends State<AddDescFull> {
             builder: (context) => new ScreenRecord(
                   channelName: user.uid,
                   category: elements1[selectedIndex1],
-                  hashtags: tags.trim(),
+                  hashtags: hash,
                   title: title.trim(),
                 )));
       }

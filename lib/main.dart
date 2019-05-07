@@ -16,6 +16,7 @@ import './main_pages/subcategory.dart';
 import './golive_screen.dart';
 import './main_pages/viewlive.dart';
 import './other_profile.dart';
+import './search.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -36,7 +37,8 @@ void main() {
       '/ScreenRecord': (context) => ScreenRecord(),
       '/ViewLive': (context) => ViewLive(),
       '/Apps': (context) => ListAppsPages(),
-      '/OtherProfile': (context) => OtherProfile()
+      '/OtherProfile': (context) => OtherProfile(),
+      'Search': (context) => Search()
       
     },
   ));
@@ -68,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: SearchBar(
-          searchHint: 'Search here',
+          searchHint: 'Search hashtags',
             defaultBar: AppBar(
           leading: Icon(Icons.games),
           backgroundColor: Color(0xfffd6a02),
@@ -87,7 +89,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 ))
           ],
         ),
-        onQuerySubmitted: (query){}
+        onQuerySubmitted: (query){
+
+            Navigator.of(context).push(new MaterialPageRoute(
+                      settings: const RouteSettings(name: '/Search'),
+                      builder: (context) => new Search(
+                            search: "#"+query.toLowerCase(),
+                          )));
+
+        }
         ),
         body: currentPage,
         floatingActionButton: FloatingActionButton(

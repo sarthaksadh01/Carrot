@@ -256,10 +256,10 @@ class _OtherProfileState extends State<OtherProfile> {
     setState(() {
       followLoading = true;
     });
-    List<String> by = [widget.uid];
+    List<String> by = [user.uid];
     Firestore.instance
         .collection('Users')
-        .document(user.uid)
+        .document(widget.uid)
         .updateData({'followers': FieldValue.arrayRemove(by)}).then((onValue) {
       setState(() {
         followLoading = false;
@@ -273,10 +273,10 @@ class _OtherProfileState extends State<OtherProfile> {
     setState(() {
       followLoading = true;
     });
-    List<dynamic> by = [widget.uid];
+    List<dynamic> by = [user.uid];
     Firestore.instance
         .collection('Users')
-        .document(user.uid)
+        .document(widget.uid)
         .updateData({'followers': FieldValue.arrayUnion(by)}).then((onValue) {
       setState(() {
         followLoading = false;
