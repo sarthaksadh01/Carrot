@@ -16,13 +16,35 @@ class ScreenRecord extends StatefulWidget {
 class _ScreenRecordState extends State<ScreenRecord> {
   @override
   void initState() {
-    _startScreenShare();
+    // _startScreenShare();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+      body: Center(
+
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            RaisedButton(
+              child: Text("Start"),
+              onPressed: (){
+                _startScreenShare();
+              },
+            ),
+            RaisedButton(
+              child: Text("Stop"),
+              onPressed: (){
+                _stopScreenShare();
+              },
+            ),
+          ],
+        ),
+
+      ),
+    );
   }
 
   Future<void> _startScreenShare() async {
@@ -30,7 +52,27 @@ class _ScreenRecordState extends State<ScreenRecord> {
    FirebaseUser user = await auth.currentUser();
     const platform = const MethodChannel('samples.flutter.io/screen_record');
     try {
-      final int result = await platform.invokeMethod('startScreenShare',{"uid":user.uid});
+      final String result = await platform.invokeMethod('startScreenShare',{"uid":user.uid});
+      if(result=="started"){
+        print("started");
+      }
+
+    } on PlatformException catch (e) {}
+
+    setState(() {
+      // _batteryLevel = batteryLevel;
+    });
+  }
+
+  Future<void> _stopScreenShare() async {
+  
+    const platform = const MethodChannel('samples.flutter.io/screen_record');
+    try {
+      final String result = await platform.invokeMethod('stopScreenShare');
+      if(result=="stopped"){
+        print("stopped");
+      }
+
     } on PlatformException catch (e) {}
 
     setState(() {

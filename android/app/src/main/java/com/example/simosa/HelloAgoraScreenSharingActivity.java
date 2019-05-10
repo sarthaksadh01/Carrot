@@ -78,6 +78,7 @@ public class HelloAgoraScreenSharingActivity extends Activity {
                 }
 
                 AgoraVideoFrame vf = new AgoraVideoFrame();
+
                 vf.format = AgoraVideoFrame.FORMAT_TEXTURE_OES;
                 vf.timeStamp = frame.pts;
                 vf.stride = frame.mFormat.mWidth;
@@ -168,7 +169,6 @@ public class HelloAgoraScreenSharingActivity extends Activity {
                         "Can not work on device do not supporting texture" + mRtcEngine.isTextureEncodeSupported());
             }
 
-            mRtcEngine.setVideoProfile(Constants.VIDEO_PROFILE_360P, true);
 
             mRtcEngine.setClientRole(Constants.CLIENT_ROLE_BROADCASTER);
         }
