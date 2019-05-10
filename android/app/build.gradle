@@ -61,5 +61,8 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
      implementation 'io.agora.rtc:full-sdk:2.4.0'
      compile 'com.android.support:multidex:1.0.3'
+     compile 'com.github.nkzawa:socket.io-client:0.3.0'
+
+     
 }
 apply plugin: 'com.google.gms.google-services'

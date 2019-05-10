@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../cardlayout.dart';
+import 'package:pk_skeleton/pk_skeleton.dart';
 
 class SubCategoryFull extends StatefulWidget {
   final String sub;
@@ -24,10 +25,15 @@ class _SubCategoryFullState extends State<SubCategoryFull> {
               .snapshots(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
-              return new CircularProgressIndicator(
-                valueColor: new AlwaysStoppedAnimation<Color>(
-                  Color(0xfffd6a02),
-                ),
+              return Center(
+                // Can be placed alone or in a ListView builder
+                child: ListView.builder(
+                    itemCount: 10,
+                    itemBuilder: (context, index) {
+                      return PKCardPageSkeleton(
+                        totalLines: 5,
+                      );
+                    }),
               );
             }
 
@@ -49,6 +55,7 @@ class _SubCategoryFullState extends State<SubCategoryFull> {
                     title: ds['title'],
                     category: ds['category'],
                     hashtags: hashSimplified,
+                    img: ds['img'],
                   );
                 });
           }),

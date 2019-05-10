@@ -17,19 +17,19 @@ class AddDescFull extends StatefulWidget {
 class _AddDescFullState extends State<AddDescFull> {
   List<String> hash = [];
   var hashtagscntrl = new TextEditingController();
-  final elements1 = [
-    "Art",
-    "Dance",
-    "Music",
-    "Games",
-    "Photography",
-    "Live Chat",
-    "Yoga",
-    "Misc"
-  ];
+  final elements1 = [];
+  final elements2 = [];
   int selectedIndex1 = 0;
   String title = "";
   String userName = "";
+  bool loading = true;
+
+  @override
+  void initState() {
+    _loadList();
+
+    super.initState();
+  }
 
   List<Widget> _buildItems1() {
     return elements1
@@ -46,117 +46,125 @@ class _AddDescFullState extends State<AddDescFull> {
         backgroundColor: Color(0xfffd6a02),
         title: Text("Go Live!"),
       ),
-      body: Center(
-          child: Column(children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(top: 20, left: 10.0, bottom: 20),
-          child: Text(
-            "Select Category",
-            style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500),
-          ),
-        ),
-        DirectSelect(
-            itemExtent: 35.0,
-            selectedIndex: selectedIndex1,
-            child: MySelectionItem(
-              isForList: false,
-              title: elements1[selectedIndex1],
+      body: loading == false
+          ? Center(
+              child: Column(children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(top: 20, left: 10.0, bottom: 20),
+                child: Text(
+                  "Select Category",
+                  style: TextStyle(
+                      color: Colors.grey, fontWeight: FontWeight.w500),
+                ),
+              ),
+              DirectSelect(
+                  itemExtent: 35.0,
+                  selectedIndex: selectedIndex1,
+                  child: MySelectionItem(
+                    isForList: false,
+                    title: elements1[selectedIndex1],
+                  ),
+                  onSelectedItemChanged: (index) {
+                    setState(() {
+                      selectedIndex1 = index;
+                      print(elements1[selectedIndex1]);
+                    });
+                  },
+                  items: _buildItems1()),
+              Padding(
+                padding: EdgeInsets.fromLTRB(30, 20, 30, 10),
+                child: TextField(
+                  onChanged: (val) {
+                    setState(() {
+                      title = val;
+                    });
+                  },
+                  decoration: new InputDecoration(
+                      prefixIcon: Icon(Icons.calendar_today),
+                      hintText: "Enter Title",
+                      border: new OutlineInputBorder(
+                          borderSide: new BorderSide(color: Colors.teal))),
+                ),
+              ),
+              Padding(
+                  padding: EdgeInsets.fromLTRB(30, 20, 30, 10),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: TextField(
+                          controller: hashtagscntrl,
+                          decoration: new InputDecoration(
+                              prefixIcon: Icon(Icons.calendar_today),
+                              hintText: "Enter #hashtags",
+                              border: new OutlineInputBorder(
+                                  borderSide:
+                                      new BorderSide(color: Colors.teal))),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 10),
+                        child: IconButton(
+                          color: Colors.white,
+                          onPressed: () {
+                            setState(() {
+                              if (hashtagscntrl.text.trim() != null)
+                                hash.add(
+                                    "#" + hashtagscntrl.text.toLowerCase());
+                              hashtagscntrl.text = "";
+                            });
+                          },
+                          icon: Icon(
+                            Icons.add,
+                            color: Color(0xfffd6a02),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )),
+              Expanded(
+                // height: 250,
+                child: ListView.builder(
+                  itemCount: hash.length,
+                  itemBuilder: (BuildContext context, index) {
+                    return Card(
+                      // color: Color(0xfffd6a02),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Container(
+                          child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: <Widget>[
+                                  Flexible(
+                                    child: Container(
+                                      child: Text(
+                                        hash[index],
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                            fontSize: 22.0,
+                                            color: Color(0xfffd6a02)),
+                                      ),
+                                    ),
+                                  ),
+                                  Spacer(),
+                                  IconButton(
+                                    icon: Icon(Icons.cancel),
+                                    onPressed: () {
+                                      setState(() {
+                                        hash.removeAt(index);
+                                      });
+                                    },
+                                  )
+                                ],
+                              ))),
+                    );
+                  },
+                ),
+              ),
+            ]))
+          : Center(
+              child: CircularProgressIndicator(),
             ),
-            onSelectedItemChanged: (index) {
-              setState(() {
-                selectedIndex1 = index;
-                print(elements1[selectedIndex1]);
-              });
-            },
-            items: _buildItems1()),
-        Padding(
-          padding: EdgeInsets.fromLTRB(30, 20, 30, 10),
-          child: TextField(
-            onChanged: (val) {
-              setState(() {
-                title = val;
-              });
-            },
-            decoration: new InputDecoration(
-                prefixIcon: Icon(Icons.calendar_today),
-                hintText: "Enter Title",
-                border: new OutlineInputBorder(
-                    borderSide: new BorderSide(color: Colors.teal))),
-          ),
-        ),
-        Padding(
-            padding: EdgeInsets.fromLTRB(30, 20, 30, 10),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: TextField(
-                    controller: hashtagscntrl,
-                    decoration: new InputDecoration(
-                        prefixIcon: Icon(Icons.calendar_today),
-                        hintText: "Enter #hashtags",
-                        border: new OutlineInputBorder(
-                            borderSide: new BorderSide(color: Colors.teal))),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 10),
-                  child: IconButton(
-                    color: Colors.white,
-                    onPressed: () {
-                      setState(() {
-                        if (hashtagscntrl.text.trim() != null)
-                          hash.add("#" + hashtagscntrl.text.toLowerCase());
-                        hashtagscntrl.text = "";
-                      });
-                    },
-                    icon: Icon(
-                      Icons.add,
-                      color: Color(0xfffd6a02),
-                    ),
-                  ),
-                ),
-              ],
-            )),
-        Expanded(
-          // height: 250,
-          child: ListView.builder(
-            itemCount: hash.length,
-            itemBuilder: (BuildContext context, index) {
-              return Card(
-                // color: Color(0xfffd6a02),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20)),
-                child: Container(
-                    child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: <Widget>[
-                            Flexible(
-                              child: Container(
-                                child: Text(
-                                  hash[index],
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                      fontSize: 22.0, color: Color(0xfffd6a02)),
-                                ),
-                              ),
-                            ),
-                            Spacer(),
-                            IconButton(
-                              icon: Icon(Icons.cancel),
-                              onPressed: () {
-                                setState(() {
-                                  hash.removeAt(index);
-                                });
-                              },
-                            )
-                          ],
-                        ))),
-              );
-            },
-          ),
-        ),
-      ])),
       bottomNavigationBar: MaterialButton(
         height: 45,
         color: Color(0xfffd6a02),
@@ -183,21 +191,22 @@ class _AddDescFullState extends State<AddDescFull> {
           fontSize: 16.0);
       return;
     }
-    List<String> hashAndTitle = [];
-    hashAndTitle.addAll(hash);
-    hashAndTitle.add("sarthak@sid@monga@carrot@simosa");
-    hashAndTitle.add("#" + elements1[selectedIndex1].toLowerCase());
-    List<String> tempTitle = title.split(" ");
-    for (int i = 0; i < tempTitle.length; i++) {
-      hashAndTitle.add("#" + tempTitle[i].toLowerCase());
-    }
-    // await _handleCameraAndMic();
     final FirebaseAuth _auth = FirebaseAuth.instance;
     FirebaseUser user = await _auth.currentUser();
     Firestore.instance.collection('Users').document(user.uid).get().then((doc) {
       setState(() {
         userName = doc.data['username'];
       });
+      List<String> hashAndTitle = [];
+      hashAndTitle.addAll(hash);
+      hashAndTitle.add("sarthak@sid@monga@carrot@simosa");
+      hashAndTitle.add("#" + elements1[selectedIndex1].toLowerCase());
+      hashAndTitle.add("#" + userName);
+      List<String> tempTitle = title.split(" ");
+      for (int i = 0; i < tempTitle.length; i++) {
+        hashAndTitle.add("#" + tempTitle[i].toLowerCase());
+      }
+      // await _handleCameraAndMic();
 
       if (widget.media == "Camera") {
         Navigator.push(
@@ -208,6 +217,7 @@ class _AddDescFullState extends State<AddDescFull> {
                   category: elements1[selectedIndex1],
                   hashtags: hashAndTitle,
                   title: title.trim(),
+                  img: elements2[selectedIndex1],
                   username: userName)),
         );
       } else {
@@ -220,6 +230,21 @@ class _AddDescFullState extends State<AddDescFull> {
                   title: title.trim(),
                 )));
       }
+    });
+  }
+
+  _loadList() {
+    Firestore.instance.collection("Categories").getDocuments().then((docs) {
+      docs.documents.forEach((doc) {
+        setState(() {
+          elements1.add(doc.data['name']);
+          elements2.add(doc.data['image']);
+        });
+      });
+
+      setState(() {
+        loading = false;
+      });
     });
   }
 

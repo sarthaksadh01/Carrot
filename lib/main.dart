@@ -18,6 +18,7 @@ import './main_pages/viewlive.dart';
 import './other_profile.dart';
 import './search.dart';
 
+
 void main() {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -160,6 +161,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _getApps() {
-    Navigator.of(context).pushNamed('/Apps');
+    Navigator.of(context).pushNamed('/ScreenRecord');
   }
 }

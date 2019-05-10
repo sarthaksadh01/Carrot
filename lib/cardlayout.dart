@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import './other_profile.dart';
 import './main_pages/viewlive.dart';
+import 'dart:ui';
 
 class CardLayout extends StatelessWidget {
-  final String uid, username, msgUid, title, category, hashtags;
+  final String uid, username, msgUid, title, category, hashtags, img;
   CardLayout(
       {this.uid,
       this.username,
       this.msgUid,
       this.title,
       this.category,
-      this.hashtags});
+      this.hashtags,
+      this.img});
   String hash = "";
   @override
   Widget build(BuildContext context) {
@@ -59,28 +61,43 @@ class CardLayout extends StatelessWidget {
             },
             child: Stack(
               children: <Widget>[
-                Image.asset(
-                  'assets/images/logob.png',
+                Image.network(
+                  img,
                   height: 250,
-                  width: 300,
-                  fit: BoxFit.fill,
                 ),
-                Center(
-                  child: Icon(Icons.play_arrow),
-                )
+                new Center(
+                  child: new ClipRect(
+                    child: new BackdropFilter(
+                      filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                      child: new Container(
+                        // width: 200.0,
+                        height: 250.0,
+                        decoration: new BoxDecoration(
+                            color: Colors.grey.shade200.withOpacity(0.3)),
+                        child: new Center(
+                            child: Icon(
+                          Icons.play_circle_filled,
+                          size: 70,
+                          color: Color(0xfffd6a02),
+                        )),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
           Row(
             children: <Widget>[
               Flexible(
-                              child: Container(
+                child: Container(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       "$title | $category",
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -90,13 +107,14 @@ class CardLayout extends StatelessWidget {
           Row(
             children: <Widget>[
               Flexible(
-                              child: Container(
+                child: Container(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       "$hashtags",
-                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w300),
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          TextStyle(fontSize: 12, fontWeight: FontWeight.w300),
                     ),
                   ),
                 ),

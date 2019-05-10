@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:pk_skeleton/pk_skeleton.dart';
 import './cardlayout.dart';
 
 class Search extends StatefulWidget {
@@ -14,7 +15,7 @@ class _SearchState extends State<Search> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.search.substring(1,widget.search.length)),
+        title: Text(widget.search.substring(1, widget.search.length)),
       ),
       body: StreamBuilder(
           stream: Firestore.instance
@@ -25,11 +26,13 @@ class _SearchState extends State<Search> {
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return Center(
-                child: new CircularProgressIndicator(
-                  valueColor: new AlwaysStoppedAnimation<Color>(
-                    Color(0xfffd6a02),
-                  ),
-                ),
+                child: ListView.builder(
+                    itemCount: 10,
+                    itemBuilder: (context, index) {
+                      return PKCardPageSkeleton(
+                        totalLines: 5,
+                      );
+                    }),
               );
             }
 
@@ -51,6 +54,7 @@ class _SearchState extends State<Search> {
                     title: ds['title'],
                     category: ds['category'],
                     hashtags: hashSimplified,
+                    img: ds['img'],
                   );
                 });
           }),

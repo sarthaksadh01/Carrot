@@ -24,8 +24,19 @@ import io.agora.rtc.ss.SinkConnector;
 import io.agora.rtc.ss.capture.ScreenCapture;
 import io.agora.rtc.video.AgoraVideoFrame;
 import io.agora.rtc.video.VideoEncoderConfiguration;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
+import java.net.*;
 
 public class HelloAgoraScreenSharingActivity extends Activity {
+
+    private Socket mSocket;
+    {
+        try {
+            mSocket = IO.socket("https://firebase-sockets.herokuapp.com");
+        } catch (URISyntaxException e) {
+        }
+    }
 
     private static final String LOG_TAG = "AgoraScreenSharing";
 
@@ -37,6 +48,9 @@ public class HelloAgoraScreenSharingActivity extends Activity {
     private RtcEngine mRtcEngine;
 
     private boolean mIsLandSpace = false;
+    private VideoEncoderConfiguration mVEC;
+
+    String uid;
 
     private void initModules() {
         DisplayMetrics metrics = new DisplayMetrics();
@@ -87,20 +101,18 @@ public class HelloAgoraScreenSharingActivity extends Activity {
             public void onError(int err) {
                 Log.d(LOG_TAG, "onError " + err);
                 switch (err) {
-                    case ScreenCapture.SCREEN_ERROR_SYSTEM_UNSUPPORTED:
-                        break;
-                    case ScreenCapture.SCREEN_ERROR_PERMISSION_DENIED:
-                        break;
+                case ScreenCapture.SCREEN_ERROR_SYSTEM_UNSUPPORTED:
+                    break;
+                case ScreenCapture.SCREEN_ERROR_PERMISSION_DENIED:
+                    break;
                 }
             }
         });
 
-        WindowManager wm = (WindowManager) getApplicationContext()
-                .getSystemService(Context.WINDOW_SERVICE);
+        WindowManager wm = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
         int screenWidth = wm.getDefaultDisplay().getWidth();
         int screenHeight = wm.getDefaultDisplay().getHeight();
-        if ((mIsLandSpace && screenWidth < screenHeight) ||
-                (!mIsLandSpace) && screenWidth > screenHeight) {
+        if ((mIsLandSpace && screenWidth < screenHeight) || (!mIsLandSpace) && screenWidth > screenHeight) {
             screenWidth = wm.getDefaultDisplay().getHeight();
             screenHeight = wm.getDefaultDisplay().getWidth();
         }
@@ -109,27 +121,33 @@ public class HelloAgoraScreenSharingActivity extends Activity {
 
         if (mRtcEngine == null) {
             try {
-                mRtcEngine = RtcEngine.create(getApplicationContext(), "a3615f94f548499eaa79ba7e513b9bb4", new IRtcEngineEventHandler() {
-                    @Override
-                    public void onJoinChannelSuccess(String channel, int uid, int elapsed) {
-                        Log.d(LOG_TAG, "onJoinChannelSuccess " + channel + " " + elapsed);
-                    }
+                mRtcEngine = RtcEngine.create(getApplicationContext(), "a3615f94f548499eaa79ba7e513b9bb4",
+                        new IRtcEngineEventHandler() {
+                            @Override
+                            public void onJoinChannelSuccess(String channel, int uid, int elapsed) {
+                                Log.d(LOG_TAG, "onJoinChannelSuccess " + channel + " " + elapsed);
+                              
 
-                    @Override
-                    public void onWarning(int warn) {
-                        Log.d(LOG_TAG, "onWarning " + warn);
-                    }
+                                mSocket.connect();
 
-                    @Override
-                    public void onError(int err) {
-                        Log.d(LOG_TAG, "onError " + err);
-                    }
+                                // mSocket.emit("LiveUser", "hello");
+                            }
 
-                    @Override
-                    public void onAudioRouteChanged(int routing) {
-                        Log.d(LOG_TAG, "onAudioRouteChanged " + routing);
-                    }
-                });
+                            @Override
+                            public void onWarning(int warn) {
+                                Log.d(LOG_TAG, "onWarning " + warn);
+                            }
+
+                            @Override
+                            public void onError(int err) {
+                                Log.d(LOG_TAG, "onError " + err);
+                            }
+
+                            @Override
+                            public void onAudioRouteChanged(int routing) {
+                                Log.d(LOG_TAG, "onAudioRouteChanged " + routing);
+                            }
+                        });
             } catch (Exception e) {
                 Log.e(LOG_TAG, Log.getStackTraceString(e));
 
@@ -137,15 +155,17 @@ public class HelloAgoraScreenSharingActivity extends Activity {
             }
 
             mRtcEngine.setChannelProfile(Constants.CHANNEL_PROFILE_LIVE_BROADCASTING);
-//            static final VideoEncoderConfiguration.VideoDimensions VD_1280x720 = new VideoEncoderConfiguration.VideoDimensions(1280, 720)
-//            mRtcEngine.setVideoEncoderConfiguration(VideoDimensions.);
+            mVEC = new VideoEncoderConfiguration(VideoEncoderConfiguration.VD_1280x720,
+                    VideoEncoderConfiguration.FRAME_RATE.FRAME_RATE_FPS_30, VideoEncoderConfiguration.STANDARD_BITRATE,
+                    VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_FIXED_PORTRAIT);
+            mRtcEngine.setVideoEncoderConfiguration(mVEC);
             mRtcEngine.enableVideo();
-
 
             if (mRtcEngine.isTextureEncodeSupported()) {
                 mRtcEngine.setExternalVideoSource(true, true, true);
             } else {
-                throw new RuntimeException("Can not work on device do not supporting texture" + mRtcEngine.isTextureEncodeSupported());
+                throw new RuntimeException(
+                        "Can not work on device do not supporting texture" + mRtcEngine.isTextureEncodeSupported());
             }
 
             mRtcEngine.setVideoProfile(Constants.VIDEO_PROFILE_360P, true);
@@ -196,11 +216,13 @@ public class HelloAgoraScreenSharingActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hello_agora_screen_sharing);
+        Bundle extras = getIntent().getExtras();
+        uid = extras.getString("uid");
 
     }
 
     public void onLiveSharingScreenClicked(View view) {
-
+        Toast.makeText(HelloAgoraScreenSharingActivity.this, uid, Toast.LENGTH_LONG).show();
 
         Button button = (Button) view;
         boolean selected = button.isSelected();
@@ -210,9 +232,7 @@ public class HelloAgoraScreenSharingActivity extends Activity {
             initModules();
             startCapture();
 
-            String channel = "ss_test" + System.currentTimeMillis();
-            channel = "ss_test";
-
+            String channel = uid;
 
             button.setText("stop");
             mRtcEngine.muteAllRemoteAudioStreams(true);
@@ -227,8 +247,6 @@ public class HelloAgoraScreenSharingActivity extends Activity {
             stopCapture();
         }
     }
-
-
 
     @Override
     protected void onDestroy() {

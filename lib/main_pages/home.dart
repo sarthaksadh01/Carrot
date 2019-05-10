@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:pk_skeleton/pk_skeleton.dart';
 import '../cardlayout.dart';
-import 'dart:ui';
 
 class Home extends StatefulWidget {
   @override
@@ -20,11 +20,13 @@ class _State extends State<Home> {
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return Center(
-                child: new CircularProgressIndicator(
-                  valueColor: new AlwaysStoppedAnimation<Color>(
-                    Color(0xfffd6a02),
-                  ),
-                ),
+                child: ListView.builder(
+                    itemCount: 10,
+                    itemBuilder: (context, index) {
+                      return PKCardPageSkeleton(
+                        totalLines: 5,
+                      );
+                    }),
               );
             }
 
@@ -32,19 +34,21 @@ class _State extends State<Home> {
                 itemCount: snapshot.data.documents.length,
                 itemBuilder: (context, index) {
                   DocumentSnapshot ds = snapshot.data.documents[index];
-                   String hashSimplified="";
-                  for(int i=0;i<ds['hashtags'].length;i++){
-                    if(ds['hashtags'][i]=="sarthak@sid@monga@carrot@simosa")break;
-                    hashSimplified+=ds['hashtags'][i]+" ";
+                  String hashSimplified = "";
+                  for (int i = 0; i < ds['hashtags'].length; i++) {
+                    if (ds['hashtags'][i] == "sarthak@sid@monga@carrot@simosa")
+                      break;
+                    hashSimplified += ds['hashtags'][i] + " ";
                     print(hashSimplified);
                   }
-                   return CardLayout(
+                  return CardLayout(
                     uid: ds['uid'],
                     username: ds['username'],
                     msgUid: ds['msg_uid'],
                     title: ds['title'],
                     category: ds['category'],
                     hashtags: hashSimplified,
+                    img: ds['img'],
                   );
                 });
           }),

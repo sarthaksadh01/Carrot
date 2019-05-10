@@ -19,23 +19,24 @@ public class MainActivity extends FlutterActivity {
 
     final String CHANNEL = "samples.flutter.io/screen_record";
 
-    new MethodChannel(getFlutterView(), CHANNEL).setMethodCallHandler(
-        new MethodChannel.MethodCallHandler() {
-            @Override
-            public void onMethodCall(MethodCall call, MethodChannel.Result result) {
-                // TODO
+    new MethodChannel(getFlutterView(), CHANNEL).setMethodCallHandler(new MethodChannel.MethodCallHandler() {
+      @Override
+      public void onMethodCall(MethodCall call, MethodChannel.Result result) {
+        // TODO
 
-                  if (call.method.equals("startScreenShare")) {
+        if (call.method.equals("startScreenShare")) {
+          String uid = call.argument("uid");
 
-                      Intent intent = new Intent(MainActivity.this , HelloAgoraScreenSharingActivity.class);
+          Intent intent = new Intent(MainActivity.this, HelloAgoraScreenSharingActivity.class);
+          intent.putExtra("uid", uid);
 
-                      startActivity(intent);
+          startActivity(intent);
 
-                } else {
-                  result.notImplemented();
-                }
-              }
-          });
+        } else {
+          result.notImplemented();
+        }
+      }
+    });
 
   }
 }

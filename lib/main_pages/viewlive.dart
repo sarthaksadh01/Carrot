@@ -7,6 +7,7 @@ import './agora_utils/videosession.dart';
 import './agora_utils/settings.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ViewLive extends StatefulWidget {
   final String channelName, msgUid;
@@ -42,8 +43,6 @@ class _GoLiveState extends State<ViewLive> {
   @override
   void initState() {
     super.initState();
-    // initialize agora sdk
-    print(widget.msgUid);
     initialize();
   }
 
@@ -71,6 +70,7 @@ class _GoLiveState extends State<ViewLive> {
   /// Create agora sdk instance and initialze
   Future<void> _initAgoraRtcEngine() async {
     AgoraRtcEngine.create(APP_ID);
+
     AgoraRtcEngine.enableVideo();
     AgoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
     AgoraRtcEngine.setClientRole(ClientRole.Audience);
@@ -78,9 +78,31 @@ class _GoLiveState extends State<ViewLive> {
 
   /// Add agora event handlers
   void _addAgoraEventHandlers() {
+    AgoraRtcEngine.onWarning = (int code) {
+      setState(() {
+        String info = 'onWarning: ' + code.toString();
+        Fluttertoast.showToast(
+            msg: info,
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIos: 1,
+            backgroundColor: Color(0xfffd6a02),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        // _infoStrings.add(info);
+      });
+    };
     AgoraRtcEngine.onError = (int code) {
       setState(() {
         String info = 'onError: ' + code.toString();
+        Fluttertoast.showToast(
+            msg: info,
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIos: 1,
+            backgroundColor: Color(0xfffd6a02),
+            textColor: Colors.white,
+            fontSize: 16.0);
         // _infoStrings.add(info);
       });
     };
@@ -345,7 +367,7 @@ class _GoLiveState extends State<ViewLive> {
       'sender_uid': user.uid,
       'time': new DateTime.now().millisecondsSinceEpoch,
     }).then((onValue) {
-    print("send");
+      print("send");
     });
   }
 

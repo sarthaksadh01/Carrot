@@ -5,14 +5,21 @@ import './agora_utils/videosession.dart';
 import './agora_utils/settings.dart';
 import 'package:random_string/random_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:socket_flutter_plugin/socket_flutter_plugin.dart';
 
 class GoLive extends StatefulWidget {
-  final String channelName, category, title, username;
+  final String channelName, category, title, username, img;
   final List<String> hashtags;
 
   /// Creates a call page with given channel name.
   const GoLive(
-      {Key key, this.channelName, this.category, this.hashtags, this.title,this.username})
+      {Key key,
+      this.channelName,
+      this.category,
+      this.hashtags,
+      this.title,
+      this.username,
+      this.img})
       : super(key: key);
 
   @override
@@ -342,16 +349,22 @@ class _GoLiveState extends State<GoLive> {
     Firestore.instance.collection('Live').add({
       'category': widget.category,
       'uid': widget.channelName,
-      'username':widget.username,
+      'username': widget.username,
       'msg_uid': msg_uid,
       'hashtags': widget.hashtags,
       'viewers': 0,
       'total_viewers': 0,
       'time': new DateTime.now().millisecondsSinceEpoch,
       'status': 'online',
-      'title': widget.title
+      'title': widget.title,
+      'img': widget.img
     }).then((onValue) {
-      // Navigator.pushReplacementNamed(context, '/Home');
+      SocketFlutterPlugin myIO = new SocketFlutterPlugin();
+      
+      myIO.socket("https://firebase-sockets.herokuapp.com/");
+      myIO.connect();
+      String jsonData = '{"msg_uid":$msg_uid}';
+      myIO.emit("userLive", jsonData);
     }).catchError((e) {});
     // _onDisconnect();
   }

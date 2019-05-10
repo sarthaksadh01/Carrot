@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ScreenRecord extends StatefulWidget {
   final String channelName, category, title;
@@ -25,9 +26,11 @@ class _ScreenRecordState extends State<ScreenRecord> {
   }
 
   Future<void> _startScreenShare() async {
+   FirebaseAuth auth = FirebaseAuth.instance;
+   FirebaseUser user = await auth.currentUser();
     const platform = const MethodChannel('samples.flutter.io/screen_record');
     try {
-      final int result = await platform.invokeMethod('startScreenShare');
+      final int result = await platform.invokeMethod('startScreenShare',{"uid":user.uid});
     } on PlatformException catch (e) {}
 
     setState(() {
