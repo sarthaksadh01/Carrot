@@ -14,10 +14,10 @@ class _LoginState extends State<LoginFull> {
   bool loading = false;
   @override
   void initState() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
-    SystemChrome.setEnabledSystemUIOverlays([]);
+    // SystemChrome.setPreferredOrientations([
+    //   DeviceOrientation.portraitUp,
+    // ]);
+    // SystemChrome.setEnabledSystemUIOverlays([]);
     super.initState();
   }
 

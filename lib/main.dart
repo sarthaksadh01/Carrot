@@ -3,7 +3,7 @@ import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:easy_dialogs/easy_dialogs.dart';
 import 'package:loader_search_bar/loader_search_bar.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import './comments.dart';
+import 'package:admob_flutter/admob_flutter.dart';
 import './profile.dart';
 import './main_pages/categories.dart';
 import './main_pages/home.dart';
@@ -17,9 +17,10 @@ import './main_pages/subcategory.dart';
 import './golive_screen.dart';
 import './main_pages/viewlive.dart';
 import './other_profile.dart';
-import './search.dart';
+import './search/search.dart';
 
 void main() {
+  Admob.initialize('ca-app-pub-3940256099942544~3347511713');
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
     theme: ThemeData(
@@ -37,7 +38,6 @@ void main() {
       '/Sub': (context) => SubCategoryFull(),
       '/ScreenRecord': (context) => ScreenRecord(),
       '/ViewLive': (context) => ViewLive(),
-      '/Apps': (context) => ListAppsPages(),
       '/OtherProfile': (context) => OtherProfile(),
       'Search': (context) => Search()
     },
@@ -95,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
               Navigator.of(context).push(new MaterialPageRoute(
                   settings: const RouteSettings(name: '/Search'),
                   builder: (context) => new Search(
-                        search: "#" + query.toLowerCase(),
+                        search: query.trim(),
                       )));
             }),
         body: currentPage,
@@ -142,27 +142,15 @@ class _MyHomePageState extends State<MyHomePage> {
                       builder: (context) => new AddDescFull(
                             media: "Camera",
                           )));
-
-                  // Navigator.pushNamed(context, '/AddDesc');
                 } else {
-                  _getApps();
-                  //  Navigator.of(context).push(new MaterialPageRoute(
-                  //     settings: const RouteSettings(name: '/AddDesc'),
-                  //     builder: (context) => new AddDescFull(
-                  //           media: "ScreenRecord",
-                  //         )));
-
-                  // // _startScreenShare();
+                  Navigator.of(context).push(new MaterialPageRoute(
+                      settings: const RouteSettings(name: '/AddDesc'),
+                      builder: (context) => new AddDescFull(
+                            media: "ScreenRecord",
+                          )));
                 }
               });
             }));
-  }
-
-  _getApps() {
-    // _firebaseMessaging.getToken().then((token) {
-    //   print(token);
-    // });
-    Navigator.of(context).pushNamed('/ScreenRecord');
   }
 
   void firebaseCloudMessagingListeners() {

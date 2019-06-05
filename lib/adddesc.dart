@@ -230,11 +230,12 @@ class _AddDescFullState extends State<AddDescFull> {
         Navigator.of(context).push(new MaterialPageRoute(
             settings: const RouteSettings(name: '/ScreenRecord'),
             builder: (context) => new ScreenRecord(
-                  channelName: user.uid,
-                  category: elements1[selectedIndex1],
-                  hashtags: hash,
-                  title: title.trim(),
-                )));
+                channelName: user.uid,
+                category: elements1[selectedIndex1],
+                hashtags: hashAndTitle,
+                title: title.trim(),
+                img: elements2[selectedIndex1],
+                username: userName)));
       }
     });
   }

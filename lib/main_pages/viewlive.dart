@@ -48,9 +48,9 @@ class _GoLiveState extends State<ViewLive> {
 
   @override
   void initState() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
+    // SystemChrome.setPreferredOrientations([
+    //   DeviceOrientation.portraitUp,
+    // ]);
     _randomColor = RandomColor();
     _loadUserName();
     initialize();

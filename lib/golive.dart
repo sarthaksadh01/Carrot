@@ -6,8 +6,6 @@ import './agora_utils/settings.dart';
 import 'package:random_string/random_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class GoLive extends StatefulWidget {
@@ -53,9 +51,9 @@ class _GoLiveState extends State<GoLive> {
   void initState() {
     super.initState();
 
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
+    // SystemChrome.setPreferredOrientations([
+    //   DeviceOrientation.portraitUp,
+    // ]);
     // initialize agora sdk
     initialize();
     // s _leaveChanel();
@@ -347,36 +345,24 @@ class _GoLiveState extends State<GoLive> {
   _updateDatabase() {
     print(widget.title);
     msg_uid = widget.channelName + randomString(10);
-    Firestore.instance.collection('Live').add({
-      'category': widget.category,
-      'uid': widget.channelName,
-      'username': widget.username,
-      'msg_uid': msg_uid,
-      'hashtags': widget.hashtags,
-      'viewers': [],
-      'likes': [],
-      'comments': [],
-      'time': new DateTime.now().millisecondsSinceEpoch,
-      'status': 'online',
-      'title': widget.title,
-      'img': widget.img
-    }).then((doc) async {
-      var result = await http
-          .post("http://firebase-sockets.herokuapp.com/notifications", body: {
-        "uid": widget.channelName,
-        "msg_uid": msg_uid,
-        "doc_id": doc.documentID
-      });
-       Fluttertoast.showToast(
-            msg: "notified",
-            toastLength: Toast.LENGTH_LONG,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIos: 1,
-            backgroundColor: Color(0xfffd6a02),
-            textColor: Colors.white,
-            fontSize: 16.0);
-     
-    }).catchError((e) {});
+    Firestore.instance
+        .collection('Live')
+        .add({
+          'category': widget.category,
+          'uid': widget.channelName,
+          'username': widget.username,
+          'msg_uid': msg_uid,
+          'hashtags': widget.hashtags,
+          'viewers': [],
+          'likes': [],
+          'comments': [],
+          'time': new DateTime.now().millisecondsSinceEpoch,
+          'status': 'online',
+          'title': widget.title,
+          'img': widget.img
+        })
+        .then((doc) {})
+        .catchError((e) {});
     // _onDisconnect();
   }
 

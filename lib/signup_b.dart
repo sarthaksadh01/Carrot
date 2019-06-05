@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -47,12 +48,15 @@ class _SignupBFullState extends State<SignupBFull> {
           Padding(
               padding: EdgeInsets.fromLTRB(30, 20, 30, 10),
               child: TextField(
+                inputFormatters: [
+                  new BlacklistingTextInputFormatter(new RegExp(
+                      '[\\.|\\,|\\!|\\#|\\%|\\^|\\&|\\*|\\(|\\)|\\~|\\`|\\[|\\{|\\]|\\}|\\;|\\:|\\"|\\?|\\/|\\>|\\<|\\ ]')),
+                ],
+                maxLength: 8,
                 controller: _uname,
                 onChanged: (val) {
                   setState(() {
-                    val.replaceAll(" ", "_");
-                    _uname.text=_uname.text.replaceAll(" ", "_");
-                    uname = _uname.text;
+                    uname = val;
                   });
                 },
                 decoration: new InputDecoration(
@@ -79,12 +83,11 @@ class _SignupBFullState extends State<SignupBFull> {
           Padding(
               padding: EdgeInsets.fromLTRB(30, 0, 30, 10),
               child: TextField(
+                maxLength: 10,
                 controller: _pno,
                 onChanged: (val) {
                   setState(() {
-                    _pno.text=_pno.text.substring(0, 10);
-                    if (val.length > 10) val = val.substring(0, 9);
-                    phone = _pno.text;
+                    phone = val;
                   });
                 },
                 keyboardType: TextInputType.phone,

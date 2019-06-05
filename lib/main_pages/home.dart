@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pk_skeleton/pk_skeleton.dart';
 import '../cardlayout.dart';
+import '../ads_layout.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -40,6 +41,30 @@ class _State extends State<Home> {
                           "sarthak@sid@monga@carrot@simosa") break;
                       hashSimplified += ds['hashtags'][i] + " ";
                     }
+
+                    if (index % 5 == 0 && index!=0) {
+                      return Column(
+                        children: <Widget>[
+                         AddLayout(),
+                          Padding(
+                            padding: EdgeInsets.only(top: 7, bottom: 7),
+                          ),
+                          CardLayout(
+                            uid: ds['uid'],
+                            username: ds['username'],
+                            msgUid: ds['msg_uid'],
+                            title: ds['title'],
+                            category: ds['category'],
+                            hashtags: hashSimplified,
+                            img: ds['img'],
+                            docId: ds.documentID,
+                            likesList: ds['likes'],
+                            viewers: ds['viewers'],
+                            commentList: ds['comments'],
+                          )
+                        ],
+                      );
+                    }
                     return CardLayout(
                       uid: ds['uid'],
                       username: ds['username'],
@@ -51,7 +76,7 @@ class _State extends State<Home> {
                       docId: ds.documentID,
                       likesList: ds['likes'],
                       viewers: ds['viewers'],
-                      commentList:ds['comments'],
+                      commentList: ds['comments'],
                     );
                   });
             }));
