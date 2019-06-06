@@ -31,11 +31,13 @@ class CardLayout_State extends State<CardLayout> {
   RandomColor _randomColor;
   Color _color;
   bool liked = false;
+  int _noOfLikes=0;
   @override
   void initState() {
     _randomColor = RandomColor();
     _color = _randomColor.randomColor();
     _isLikedByUser();
+    _noOfLikes=widget.likesList.length;
     super.initState();
   }
 
@@ -166,7 +168,7 @@ class CardLayout_State extends State<CardLayout> {
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 4.0),
-                child: Text("${widget.likesList.length}"),
+                child: Text("$_noOfLikes"),
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 8.0),
@@ -264,6 +266,7 @@ class CardLayout_State extends State<CardLayout> {
     if (liked) {
       setState(() {
         liked = false;
+        _noOfLikes-=1;
       });
       Firestore.instance.collection('Live').document(widget.docId).updateData({
         'likes': FieldValue.arrayRemove([user.uid])
@@ -271,6 +274,7 @@ class CardLayout_State extends State<CardLayout> {
     } else {
       setState(() {
         liked = true;
+        _noOfLikes+=1;
       });
       Firestore.instance.collection('Live').document(widget.docId).updateData({
         'likes': FieldValue.arrayUnion([user.uid])

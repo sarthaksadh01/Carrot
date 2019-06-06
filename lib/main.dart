@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
-import 'package:easy_dialogs/easy_dialogs.dart';
 import 'package:loader_search_bar/loader_search_bar.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:admob_flutter/admob_flutter.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
 import './profile.dart';
 import './main_pages/categories.dart';
 import './main_pages/home.dart';
@@ -127,30 +127,32 @@ class _MyHomePageState extends State<MyHomePage> {
   void add() {
     showDialog(
         context: context,
-        builder: (context) => SingleChoiceConfirmationDialog<String>(
-            actionButtonLabelColor: Color(0xfffd6a02),
-            activeColor: Color(0xfffd6a02),
-            title: Text('Select Option'),
-            items: ['Screen Recorder', 'Camera'],
-            // onSelected: ,
-            onSubmitted: (val) {
-              setState(() {
-                addOption = val;
-                if (val == "Camera") {
-                  Navigator.of(context).push(new MaterialPageRoute(
-                      settings: const RouteSettings(name: '/AddDesc'),
-                      builder: (context) => new AddDescFull(
-                            media: "Camera",
-                          )));
-                } else {
-                  Navigator.of(context).push(new MaterialPageRoute(
-                      settings: const RouteSettings(name: '/AddDesc'),
-                      builder: (context) => new AddDescFull(
-                            media: "ScreenRecord",
-                          )));
-                }
-              });
-            }));
+        builder: (_) => NetworkGiffyDialog(
+              buttonCancelColor: Colors.green,
+              onCancelButtonPressed: () {
+                Navigator.of(context).push(new MaterialPageRoute(
+                    settings: const RouteSettings(name: '/AddDesc'),
+                    builder: (context) => new AddDescFull(
+                          media: "Camera",
+                        )));
+              },
+              image: Image.asset('assets/images/logob.png'),
+              title: Text('Select an Option',
+                  textAlign: TextAlign.center,
+                  style:
+                      TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600)),
+              description: Text(
+                'You can go live either through device camera or through screen recording!',
+                textAlign: TextAlign.center,
+              ),
+              onOkButtonPressed: () {
+                Navigator.of(context).push(new MaterialPageRoute(
+                    settings: const RouteSettings(name: '/AddDesc'),
+                    builder: (context) => new AddDescFull(
+                          media: "ScreenRecord",
+                        )));
+              },
+            ));
   }
 
   void firebaseCloudMessagingListeners() {

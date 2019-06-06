@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:direct_select/direct_select.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flare_flutter/flare_actor.dart';
-// import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_tags/input_tags.dart';
 import './golive.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import './golive_screen.dart';
@@ -17,12 +16,11 @@ class AddDescFull extends StatefulWidget {
 
 class _AddDescFullState extends State<AddDescFull> {
   List<String> hash = [];
-  var hashtagscntrl = new TextEditingController();
-  final elements1 = [];
-  final elements2 = [];
-  int selectedIndex1 = 0;
+  List<String> elements1 = [];
+  Map<String, String> map = {};
   String title = "";
   String userName = "";
+  String categoryName;
   bool loading = true;
 
   @override
@@ -30,14 +28,6 @@ class _AddDescFullState extends State<AddDescFull> {
     _loadList();
 
     super.initState();
-  }
-
-  List<Widget> _buildItems1() {
-    return elements1
-        .map((val) => MySelectionItem(
-              title: val,
-            ))
-        .toList();
   }
 
   @override
@@ -48,121 +38,75 @@ class _AddDescFullState extends State<AddDescFull> {
         title: Text("Go Live!"),
       ),
       body: loading == false
-          ? Center(
-              child: Column(children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(top: 20, left: 10.0, bottom: 20),
-                child: Text(
-                  "Select Category",
-                  style: TextStyle(
-                      color: Colors.grey, fontWeight: FontWeight.w500),
-                ),
-              ),
-              DirectSelect(
-                  itemExtent: 35.0,
-                  selectedIndex: selectedIndex1,
-                  child: MySelectionItem(
-                    isForList: false,
-                    title: elements1[selectedIndex1],
-                  ),
-                  onSelectedItemChanged: (index) {
-                    setState(() {
-                      selectedIndex1 = index;
-                      print(elements1[selectedIndex1]);
-                    });
-                  },
-                  items: _buildItems1()),
-              Padding(
-                padding: EdgeInsets.fromLTRB(30, 20, 30, 10),
-                child: TextField(
-                  onChanged: (val) {
-                    setState(() {
-                      title = val;
-                    });
-                  },
-                  decoration: new InputDecoration(
-                      prefixIcon: Icon(Icons.calendar_today),
-                      hintText: "Enter Title",
-                      border: new OutlineInputBorder(
-                          borderSide: new BorderSide(color: Colors.teal))),
-                ),
-              ),
-              Padding(
+          ? SingleChildScrollView(
+              child: Center(
+                  child: Column(children: <Widget>[
+                Padding(
                   padding: EdgeInsets.fromLTRB(30, 20, 30, 10),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: TextField(
-                          controller: hashtagscntrl,
-                          decoration: new InputDecoration(
-                              prefixIcon: Icon(Icons.calendar_today),
-                              hintText: "Enter #hashtags",
-                              border: new OutlineInputBorder(
-                                  borderSide:
-                                      new BorderSide(color: Colors.teal))),
-                        ),
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    hint: Text("Select Category!"),
+                    value: categoryName,
+                    onChanged: (String newValue) {
+                      setState(() {
+                        categoryName = newValue;
+                      });
+                    },
+                    items:
+                        elements1.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(30, 20, 30, 10),
+                  child: Container(
+                    decoration: new BoxDecoration(border: new Border.all()),
+                    height: 100,
+                    padding: EdgeInsets.all(10.0),
+                    child: new ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: 100.0,
                       ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 10),
-                        child: IconButton(
-                          color: Colors.white,
-                          onPressed: () {
-                            setState(() {
-                              if (hashtagscntrl.text.trim() != null)
-                                hash.add(
-                                    "#" + hashtagscntrl.text.toLowerCase());
-                              hashtagscntrl.text = "";
-                            });
-                          },
-                          icon: Icon(
-                            Icons.add,
-                            color: Color(0xfffd6a02),
+                      child: new Scrollbar(
+                        child: new SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          reverse: true,
+                          child: SizedBox(
+                            height: 90.0,
+                            child: new TextField(
+                              onChanged: (val) {
+                                setState(() {
+                                  title = val;
+                                });
+                              },
+                              maxLines: 10,
+                              decoration: new InputDecoration(
+                                border: InputBorder.none,
+                                hintText: 'Describe your stream',
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ],
-                  )),
-              Expanded(
-                // height: 250,
-                child: ListView.builder(
-                  itemCount: hash.length,
-                  itemBuilder: (BuildContext context, index) {
-                    return Card(
-                      // color: Color(0xfffd6a02),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                      child: Container(
-                          child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                children: <Widget>[
-                                  Flexible(
-                                    child: Container(
-                                      child: Text(
-                                        hash[index],
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                            fontSize: 22.0,
-                                            color: Color(0xfffd6a02)),
-                                      ),
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  IconButton(
-                                    icon: Icon(Icons.cancel),
-                                    onPressed: () {
-                                      setState(() {
-                                        hash.removeAt(index);
-                                      });
-                                    },
-                                  )
-                                ],
-                              ))),
-                    );
-                  },
+                    ),
+                  ),
                 ),
-              ),
-            ]))
+                InputTags(
+                  placeholder: "Add hashtags",
+                  tags: hash,
+                  height: 45,
+                  inputDecoration: new InputDecoration(
+                    border: new OutlineInputBorder(
+                        borderSide: new BorderSide()),
+                    hintText: 'Add hashtags',
+                  ),
+                )
+              ])),
+            )
           : Center(
               child: FlareActor(
                 "assets/flare/loading.flr",
@@ -197,6 +141,18 @@ class _AddDescFullState extends State<AddDescFull> {
           fontSize: 16.0);
       return;
     }
+
+    if (categoryName == null) {
+      Fluttertoast.showToast(
+          msg: "Please select a category!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIos: 1,
+          backgroundColor: Color(0xfffd6a02),
+          textColor: Colors.white,
+          fontSize: 16.0);
+      return;
+    }
     final FirebaseAuth _auth = FirebaseAuth.instance;
     FirebaseUser user = await _auth.currentUser();
     Firestore.instance.collection('Users').document(user.uid).get().then((doc) {
@@ -204,9 +160,12 @@ class _AddDescFullState extends State<AddDescFull> {
         userName = doc.data['username'];
       });
       List<String> hashAndTitle = [];
+      for (int i = 0; i < hash.length; i++) {
+        hash[i] = "#" + hash[i];
+      }
       hashAndTitle.addAll(hash);
       hashAndTitle.add("sarthak@sid@monga@carrot@simosa");
-      hashAndTitle.add("#" + elements1[selectedIndex1].toLowerCase());
+      hashAndTitle.add("#" + categoryName.toLowerCase());
       hashAndTitle.add("#" + userName);
       List<String> tempTitle = title.split(" ");
       for (int i = 0; i < tempTitle.length; i++) {
@@ -220,10 +179,10 @@ class _AddDescFullState extends State<AddDescFull> {
           MaterialPageRoute(
               builder: (context) => GoLive(
                   channelName: user.uid,
-                  category: elements1[selectedIndex1],
+                  category: categoryName,
                   hashtags: hashAndTitle,
                   title: title.trim(),
-                  img: elements2[selectedIndex1],
+                  img: map[categoryName],
                   username: userName)),
         );
       } else {
@@ -231,10 +190,10 @@ class _AddDescFullState extends State<AddDescFull> {
             settings: const RouteSettings(name: '/ScreenRecord'),
             builder: (context) => new ScreenRecord(
                 channelName: user.uid,
-                category: elements1[selectedIndex1],
+                category: categoryName,
                 hashtags: hashAndTitle,
                 title: title.trim(),
-                img: elements2[selectedIndex1],
+                img: map[categoryName],
                 username: userName)));
       }
     });
@@ -244,59 +203,16 @@ class _AddDescFullState extends State<AddDescFull> {
     Firestore.instance.collection("Categories").getDocuments().then((docs) {
       docs.documents.forEach((doc) {
         setState(() {
+          // categoryName=doc.data['name'];
           elements1.add(doc.data['name']);
-          elements2.add(doc.data['image']);
+          map[doc.data['name']] = doc.data['image'];
         });
       });
 
       setState(() {
         loading = false;
       });
+      print(map);
     });
-  }
-
-  // _handleCameraAndMic() async {
-  //   await PermissionHandler().requestPermissions(
-  //       [PermissionGroup.camera, PermissionGroup.microphone]);
-  // }
-}
-
-class MySelectionItem extends StatelessWidget {
-  final String title;
-  final bool isForList;
-
-  const MySelectionItem({Key key, this.title, this.isForList = true})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 60.0,
-      child: isForList
-          ? Padding(
-              child: _buildItem(context),
-              padding: EdgeInsets.all(10.0),
-            )
-          : Card(
-              margin: EdgeInsets.symmetric(horizontal: 10.0),
-              child: Stack(
-                children: <Widget>[
-                  _buildItem(context),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Icon(Icons.arrow_drop_down),
-                  )
-                ],
-              ),
-            ),
-    );
-  }
-
-  _buildItem(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      alignment: Alignment.center,
-      child: Text(title),
-    );
   }
 }

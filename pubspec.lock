@@ -71,20 +71,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.7"
-  direct_select:
-    dependency: "direct dev"
-    description:
-      name: direct_select
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.0"
-  easy_dialogs:
-    dependency: "direct dev"
-    description:
-      name: easy_dialogs
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.0"
   fancy_bottom_navigation:
     dependency: "direct dev"
     description:
@@ -153,6 +139,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.7"
+  flutter_tags:
+    dependency: "direct dev"
+    description:
+      name: flutter_tags
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -172,6 +165,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "8.4.0"
+  giffy_dialog:
+    dependency: "direct dev"
+    description:
+      name: giffy_dialog
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.3.0"
   google_sign_in:
     dependency: "direct dev"
     description:
@@ -256,6 +256,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.0"
+  pull_to_refresh:
+    dependency: "direct dev"
+    description:
+      name: pull_to_refresh
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.4.1"
   quiver:
     dependency: transitive
     description:
