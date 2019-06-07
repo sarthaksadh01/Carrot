@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flare_flutter/flare_actor.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import './profile_card.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -11,13 +13,17 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   int _followers = 0;
   int _uploads = 0;
-  int _level = 0;
+  int _likes = 0;
+  int _viewers = 0;
+  String _userName="";
+
   bool loading = true;
   FirebaseAuth auth;
-  // =
   FirebaseUser user;
   String userUid;
-  // =
+
+  List<ProfileCard> list = [];
+
   @override
   void initState() {
     _loadData();
@@ -25,90 +31,8 @@ class _ProfileState extends State<Profile> {
     super.initState();
   }
 
-  Widget _buildCoverImage(Size screenSize) {
-    return Container(
-      height: screenSize.height / 2.6,
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: NetworkImage(
-              'https://pub-static.haozhaopian.net/assets/projects/pages/7dc25bd0-93c5-11e8-bb5f-571eb52efbb2_1ede0186-8709-4911-ad8a-ec6ace3ef05b_thumb.jpg'),
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
-  }
 
-  Widget _buildProfileImage() {
-    return Center(
-      child: Container(
-        width: 140.0,
-        height: 140.0,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage(
-                'https://cdn.pixabay.com/photo/2017/02/23/13/05/profile-2092113_960_720.png'),
-            fit: BoxFit.cover,
-          ),
-          borderRadius: BorderRadius.circular(80.0),
-          border: Border.all(
-            color: Colors.white,
-            width: 10.0,
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildStatItem(
-    String label,
-    int count,
-  ) {
-    TextStyle _statLabelTextStyle = TextStyle(
-      fontFamily: 'Roboto',
-      color: Colors.black,
-      fontSize: 16.0,
-      fontWeight: FontWeight.w200,
-    );
-
-    TextStyle _statCountTextStyle = TextStyle(
-      color: Colors.black54,
-      fontSize: 24.0,
-      fontWeight: FontWeight.bold,
-    );
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text(
-          '$count',
-          style: _statCountTextStyle,
-        ),
-        Text(
-          label,
-          style: _statLabelTextStyle,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatContainer() {
-    return Container(
-      height: 60.0,
-      margin: EdgeInsets.only(top: 8.0),
-      decoration: BoxDecoration(
-        color: Color(0xFFEFF4F7),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          _buildStatItem("Followers", _followers),
-          _buildStatItem("Uploads", _uploads),
-          _buildStatItem("Level", _level),
-          
-        ],
-      ),
-    );
-  }
 
   Widget _profileData() {
     return StreamBuilder(
@@ -162,34 +86,149 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
+    final String url =
+        'https://static.independent.co.uk/s3fs-public/thumbnails/image/2018/09/04/15/lionel-messi-0.jpg?';
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "profile",
-          // widget.fullName,
-          style: TextStyle(color: Colors.white),
-        ),
+        title: Text('Profile'),
+        elevation: 0,
         backgroundColor: Color(0xfffd6a02),
       ),
       body: loading == false
-          ? Stack(
+          ? SingleChildScrollView(
+            child: Column(
               children: <Widget>[
-                _buildCoverImage(screenSize),
-                SafeArea(
-                  child: SingleChildScrollView(
+                SingleChildScrollView(
+                                  child: Container(
+                    padding: EdgeInsets.only(top: 16),
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height / 2.5,
+                    decoration: BoxDecoration(
+                      color: Color(0xfffd6a02),
+                      borderRadius: BorderRadius.only(
+                          bottomRight: Radius.circular(32),
+                          bottomLeft: Radius.circular(32)),
+                    ),
                     child: Column(
                       children: <Widget>[
-                        SizedBox(height: screenSize.height / 6.4),
-                        _buildProfileImage(),
-                        _buildStatContainer(),
-                        _profileData()
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                              width: 120,
+                              height: 120,
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                      fit: BoxFit.fill,
+                                      image: NetworkImage(url))),
+                            ),
+                          ],
+                        ),
+                
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16, bottom: 32),
+                          child: Text(
+                            '$_userName',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16, right: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Column(
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.videocam,
+                                    color: Colors.white,
+                                  ),
+                                  Text(
+                                    'Uploads',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  Text(
+                                    '$_uploads',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.favorite,
+                                    color: Colors.white,
+                                  ),
+                                  Text(
+                                    'Likes',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  Text(
+                                    '$_likes',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                children: <Widget>[
+                                  Icon(
+                                    FontAwesomeIcons.solidEye,
+                                    color: Colors.white,
+                                  ),
+                                  Text(
+                                    'Viewers',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  Text(
+                                    '$_viewers',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.group,
+                                    color: Colors.white,
+                                  ),
+                                  Text(
+                                    'Followers',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  Text(
+                                    '$_followers',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
                       ],
                     ),
                   ),
                 ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                  Text("Uploads",style: TextStyle(fontSize: 30),)
+
+                ],),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: List<Widget>.generate(list.length, (index) {
+                      return list[index];
+                    }),
+                  ),
+                ),
               ],
-            )
+            ),
+          )
           : Center(
               child: FlareActor(
                 "assets/flare/loading.flr",
@@ -212,8 +251,21 @@ class _ProfileState extends State<Profile> {
       docs.documents.forEach((doc) {
         setState(() {
           _uploads++;
+          _likes += doc.data['likes'].length;
+          _viewers += doc.data['viewers'].length;
+          ProfileCard profileCard = new ProfileCard(
+            img: doc.data['img'],
+            title: doc.data['title'],
+            category: doc.data['category'],
+            likeList: doc.data['likes'],
+            commentList: doc.data['comments'],
+            viewers: doc.data['viewers'],
+          );
+          list.add(profileCard);
         });
       });
+
+      print(list);
 
       Firestore.instance
           .collection('Users')
@@ -223,6 +275,7 @@ class _ProfileState extends State<Profile> {
         List<String> flwrs = List.from(doc.data['followers']);
         setState(() {
           _followers = flwrs.length;
+          _userName=doc.data['username'];
           loading = false;
         });
       });

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pk_skeleton/pk_skeleton.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../cardlayout.dart';
 import '../ads_layout.dart';
@@ -11,7 +10,6 @@ class Home extends StatefulWidget {
 }
 
 class _State extends State<Home> {
-  bool _isFinish = false;
   List<CardLayout> list = [];
   var _lastDocument;
   RefreshController _refreshController;
@@ -25,9 +23,8 @@ class _State extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
         body: SmartRefresher(
-          footer: ClassicFooter(),
+      footer: ClassicFooter(),
       enablePullDown: true,
       enablePullUp: true,
       header: WaterDropMaterialHeader(
@@ -49,8 +46,8 @@ class _State extends State<Home> {
     Firestore.instance
         .collection('Live')
         .where('status', isEqualTo: 'online')
-        .orderBy("viewers", descending: true)
-        .startAfter([_lastDocument['viewers']])
+        .orderBy("start_time", descending: true)
+        .startAfter([_lastDocument['start_time']])
         .limit(5)
         .getDocuments()
         .then((docs) {
@@ -95,7 +92,7 @@ class _State extends State<Home> {
     Firestore.instance
         .collection('Live')
         .where('status', isEqualTo: 'online')
-        .orderBy("viewers", descending: true)
+        .orderBy("start_time", descending: true)
         .limit(5)
         .getDocuments()
         .then((docs) {

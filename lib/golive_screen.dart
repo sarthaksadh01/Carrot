@@ -85,25 +85,21 @@ class _ScreenRecordState extends State<ScreenRecord> {
                 child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(
-                      "You are live!"),
+                  Text("You are live!"),
                   Padding(
                     padding: EdgeInsets.all(10),
                   ),
-                 MaterialButton(
-        height: 45,
-        color: Color(0xfffd6a02),
-        child:
-       
-            Text(
-                "Stop Recording",
-                style: TextStyle(color: Colors.white),
-              ),
-            
-        onPressed: () {
-         _stopScreenShare();
-        },
-      ),
+                  MaterialButton(
+                    height: 45,
+                    color: Color(0xfffd6a02),
+                    child: Text(
+                      "Stop Recording",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () {
+                      _stopScreenShare();
+                    },
+                  ),
                 ],
               )));
   }
@@ -153,13 +149,14 @@ class _ScreenRecordState extends State<ScreenRecord> {
       'time': new DateTime.now().millisecondsSinceEpoch,
       'status': 'online',
       'title': widget.title,
-      'img': widget.img
+      'img': widget.img,
+      'start_time': DateTime.now().millisecondsSinceEpoch,
+      'end_time': DateTime.now().millisecondsSinceEpoch
     }).then((doc) {
       setState(() {
         _started = true;
- });
+      });
 //  _openApp(appName);
-         
     }).catchError((e) {});
   }
 
@@ -180,12 +177,11 @@ class _ScreenRecordState extends State<ScreenRecord> {
     });
   }
 
-  _openApp(String appName)async{
-        const platform = const MethodChannel('samples.flutter.io/screen_record');
+  _openApp(String appName) async {
+    const platform = const MethodChannel('samples.flutter.io/screen_record');
     try {
       final String result =
           await platform.invokeMethod('openApp', {"packageName": appName});
-     
     } on PlatformException catch (e) {}
   }
 }

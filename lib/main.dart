@@ -4,6 +4,8 @@ import 'package:loader_search_bar/loader_search_bar.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:admob_flutter/admob_flutter.dart';
 import 'package:giffy_dialog/giffy_dialog.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import './profile.dart';
 import './main_pages/categories.dart';
 import './main_pages/home.dart';
@@ -54,6 +56,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  FirebaseAuth auth;
+  FirebaseUser user;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   Categories categories = new Categories();
   Home home = new Home();
@@ -63,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     currentPage = home;
-    firebaseCloudMessagingListeners();
+   _loadUser();
 
     super.initState();
   }
@@ -142,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   style:
                       TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600)),
               description: Text(
-                'You can go live either through device camera or through screen recording!',
+                'You can go live either through device camera or through screen sharing!',
                 textAlign: TextAlign.center,
               ),
               onOkButtonPressed: () {
@@ -155,10 +159,24 @@ class _MyHomePageState extends State<MyHomePage> {
             ));
   }
 
+ _loadUser() async {
+    auth = FirebaseAuth.instance;
+    user = await auth.currentUser();
+    firebaseCloudMessagingListeners();
+  }
+
   void firebaseCloudMessagingListeners() {
     _firebaseMessaging.getToken().then((token) {
       print(token);
     });
+   Firestore.instance.collection('Users').document(user.uid).get().then((doc){
+     for(int i=0;i<doc.data['following'].length;i++){
+       print(doc.data['following'][i]);
+       _firebaseMessaging.subscribeToTopic(doc.data['following'][i].toString());
+     }
+
+   });
+    // _firebaseMessaging.subscribeToTopic("topic");
 
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {

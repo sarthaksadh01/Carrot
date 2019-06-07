@@ -28,7 +28,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   fancy_bottom_navigation: ^0.3.2
-  flutter_auth_buttons: ^0.3.1
   flutter_datetime_picker: ^1.1.5
   firebase_auth: ^0.6.2+1
   fluttertoast: ^3.0.3

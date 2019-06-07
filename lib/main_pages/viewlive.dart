@@ -7,7 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:random_color/random_color.dart';
-import 'package:flutter/services.dart';
+
 
 class ViewLive extends StatefulWidget {
   final String channelName, msgUid, docId;

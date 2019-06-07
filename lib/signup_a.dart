@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 import './signup_b.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -23,6 +22,7 @@ class _SignupAFullState extends State<SignupAFull> {
               color: Color(0xfffd6a02),
               child: Image.asset("assets/images/logo.png"),
             ),
+      
             Center(
               child: new ClipRect(
                 child: new BackdropFilter(
@@ -37,65 +37,65 @@ class _SignupAFullState extends State<SignupAFull> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
                         Padding(
-                          padding: EdgeInsets.all(10),
-                          child: FacebookSignInButton(onPressed: () {}),
+                          padding: const EdgeInsets.all(8.0),
+                          child: InkWell(
+                            onTap: () {
+                              _googleSignIn();
+                            },
+                            child: Container(
+                              height: 45,
+                              width: MediaQuery.of(context).size.width / 1.2,
+                              decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Colors.white, Colors.white],
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(50))),
+                              child: Center(
+                                  child: Text(
+                                'Signup with google'.toUpperCase(),
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold),
+                              )),
+                            ),
+                          ),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(10),
-                          child: GoogleSignInButton(onPressed: () {
-                            _googleSignIn();
-                          }),
+                          padding: const EdgeInsets.all(8.0),
+                          child: InkWell(
+                            onTap: () {
+                              _googleSignIn();
+                            },
+                            child: Container(
+                              height: 45,
+                              width: MediaQuery.of(context).size.width / 1.2,
+                              decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Colors.blue, Colors.blueAccent],
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(50))),
+                              child: Center(
+                                  child: Text(
+                                'Signup with facebook'.toUpperCase(),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              )),
+                            ),
+                          ),
                         ),
-                         Padding(
-                          padding: EdgeInsets.all(10),
-                          child: TwitterSignInButton(onPressed: () {
-                            _googleSignIn();
-                          }),
-                        )
                       ],
                     )),
                   ),
                 ),
               ),
             ),
-            Transform.rotate(
-              angle: 70,
-              child:Center(child: Image.asset("assets/images/carrotlogin.png"),) ,
-            )
-            // 
+           
+            
           ],
-        )
-
-        //  Center(
-        //   child: Stack(
-        //     // mainAxisAlignment: MainAxisAlignment.center,
-        //     children: <Widget>[
-        //       Image.asset("assets/images/logob.png", height: 250),
-        //       Column(
-        //         mainAxisAlignment: MainAxisAlignment.end,
-        //         children: <Widget>[
-        //           Padding(
-        //             padding: EdgeInsets.all(10),
-        //             child: FacebookSignInButton(onPressed: () {}),
-        //           ),
-        //           Padding(
-        //             padding: EdgeInsets.all(10),
-        //             child: GoogleSignInButton(onPressed: () {
-        //               _googleSignIn();
-        //             }),
-        //           )
-        //         ],
-        //       )
-        //     ],
-        //   ),
-        // ),
-        // bottomNavigationBar: Padding(
-        //   padding: EdgeInsets.all(10),
-        //   child: GoogleSignInButton(onPressed: () {
-        //     _googleSignIn();
-        //   }),
-        // ),
-        );
+        ));
   }
 
   _googleSignIn() async {
@@ -123,4 +123,6 @@ class _SignupAFullState extends State<SignupAFull> {
               )));
     });
   }
+
+  
 }

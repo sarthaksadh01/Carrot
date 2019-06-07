@@ -359,7 +359,10 @@ class _GoLiveState extends State<GoLive> {
           'time': new DateTime.now().millisecondsSinceEpoch,
           'status': 'online',
           'title': widget.title,
-          'img': widget.img
+          'img': widget.img,
+          'start_time':DateTime.now().millisecondsSinceEpoch,
+          'end_time':DateTime.now().millisecondsSinceEpoch
+
         })
         .then((doc) {})
         .catchError((e) {});
