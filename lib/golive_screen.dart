@@ -1,13 +1,16 @@
+import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:device_apps/device_apps.dart';
 import 'package:random_string/random_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
 
 class ScreenRecord extends StatefulWidget {
   final String channelName, category, title, username, img;
   final List<String> hashtags;
+  final int level;
   const ScreenRecord(
       {Key key,
       this.channelName,
@@ -15,7 +18,8 @@ class ScreenRecord extends StatefulWidget {
       this.hashtags,
       this.title,
       this.username,
-      this.img})
+      this.img,
+      this.level})
       : super(key: key);
 
   @override
@@ -27,6 +31,7 @@ class _ScreenRecordState extends State<ScreenRecord> {
   String _msgUid = "";
   @override
   void initState() {
+    _startScreenShare("");
     super.initState();
     // _start();
   }
@@ -41,46 +46,52 @@ class _ScreenRecordState extends State<ScreenRecord> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Please select an app to continue"),
+          title: Text("Go live!"),
         ),
         body: _started == false
-            ? FutureBuilder(
-                future: DeviceApps.getInstalledApplications(
-                    includeAppIcons: true,
-                    includeSystemApps: true,
-                    onlyAppsWithLaunchIntent: true),
-                builder: (context, data) {
-                  if (data.data == null) {
-                    return Center(child: CircularProgressIndicator());
-                  } else {
-                    List<Application> apps = data.data;
-                    print(apps);
-                    return ListView.builder(
-                        itemBuilder: (context, position) {
-                          Application app = apps[position];
-                          return Column(
-                            children: <Widget>[
-                              ListTile(
-                                leading: app is ApplicationWithIcon
-                                    ? CircleAvatar(
-                                        backgroundImage: MemoryImage(app.icon),
-                                        backgroundColor: Colors.white,
-                                      )
-                                    : null,
-                                onTap: () {
-                                  _startScreenShare(app.appName);
-                                },
-                                title: Text("${app.appName}"),
-                              ),
-                              Divider(
-                                height: 1.0,
-                              )
-                            ],
-                          );
-                        },
-                        itemCount: apps.length);
-                  }
-                })
+            ? FlareActor(
+                "assets/flare/loading.flr",
+                alignment: Alignment.center,
+                fit: BoxFit.contain,
+                animation: "Untitled",
+              )
+            // ? FutureBuilder(
+            //     future: DeviceApps.getInstalledApplications(
+            //         includeAppIcons: true,
+            //         includeSystemApps: true,
+            //         onlyAppsWithLaunchIntent: true),
+            //     builder: (context, data) {
+            //       if (data.data == null) {
+            //         return Center(child: CircularProgressIndicator());
+            //       } else {
+            //         List<Application> apps = data.data;
+            //         print(apps);
+            //         return ListView.builder(
+            //             itemBuilder: (context, position) {
+            //               Application app = apps[position];
+            //               return Column(
+            //                 children: <Widget>[
+            //                   ListTile(
+            //                     leading: app is ApplicationWithIcon
+            //                         ? CircleAvatar(
+            //                             backgroundImage: MemoryImage(app.icon),
+            //                             backgroundColor: Colors.white,
+            //                           )
+            //                         : null,
+            //                     onTap: () {
+            //                       _startScreenShare(app.appName);
+            //                     },
+            //                     title: Text("${app.appName}"),
+            //                   ),
+            //                   Divider(
+            //                     height: 1.0,
+            //                   )
+            //                 ],
+            //               );
+            //             },
+            //             itemCount: apps.length);
+            //       }
+            //     })
             : Center(
                 child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -93,7 +104,7 @@ class _ScreenRecordState extends State<ScreenRecord> {
                     height: 45,
                     color: Color(0xfffd6a02),
                     child: Text(
-                      "Stop Recording",
+                      "Stop Screen Sharing!",
                       style: TextStyle(color: Colors.white),
                     ),
                     onPressed: () {
@@ -126,12 +137,11 @@ class _ScreenRecordState extends State<ScreenRecord> {
           _started = false;
         });
         _leaveChanel();
+       Navigator.pushReplacementNamed(context, '/Home');
       }
     } on PlatformException catch (e) {}
 
-    setState(() {
-      // _batteryLevel = batteryLevel;
-    });
+   
   }
 
   _updateDatabase(String appName) {
@@ -146,13 +156,14 @@ class _ScreenRecordState extends State<ScreenRecord> {
       'viewers': [],
       'likes': [],
       'comments': [],
-      'time': new DateTime.now().millisecondsSinceEpoch,
       'status': 'online',
       'title': widget.title,
       'img': widget.img,
       'start_time': DateTime.now().millisecondsSinceEpoch,
-      'end_time': DateTime.now().millisecondsSinceEpoch
+      'level':widget.level,
+       'type':"screen"
     }).then((doc) {
+      _sendNotification();
       setState(() {
         _started = true;
       });
@@ -183,5 +194,12 @@ class _ScreenRecordState extends State<ScreenRecord> {
       final String result =
           await platform.invokeMethod('openApp', {"packageName": appName});
     } on PlatformException catch (e) {}
+  }
+
+  _sendNotification()async{
+     var result = await http.post(
+        "http://ec2-13-235-73-103.ap-south-1.compute.amazonaws.com:3000/notifications/",
+        body: {"uid": widget.channelName});
+        print(result.body);
   }
 }

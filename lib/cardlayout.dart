@@ -10,6 +10,8 @@ import 'dart:ui';
 class CardLayout extends StatefulWidget {
   final String uid, username, msgUid, title, category, hashtags, img, docId;
   final likesList, viewers, commentList;
+  final int level;
+  // final int 
 
   CardLayout(
       {this.uid,
@@ -22,7 +24,8 @@ class CardLayout extends StatefulWidget {
       this.docId,
       this.likesList,
       this.viewers,
-      this.commentList});
+      this.commentList,
+      this.level});
   @override
   CardLayout_State createState() => CardLayout_State();
 }
@@ -80,6 +83,12 @@ class CardLayout_State extends State<CardLayout> {
                   ),
                 ),
               ),
+              Spacer(),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: _buildBadge(),
+              )
+
             ],
           ),
           Divider(),
@@ -280,5 +289,20 @@ class CardLayout_State extends State<CardLayout> {
         'likes': FieldValue.arrayUnion([user.uid])
       });
     }
+  }
+    Widget _buildBadge() {
+    var _icon;
+    if (widget.level == 1)
+      _icon = Icon(Icons.whatshot);
+    else if (widget.level == 2)
+      _icon = Icon(FontAwesomeIcons.userNinja);
+    else if (widget.level == 3)
+      _icon = Icon(FontAwesomeIcons.ghost);
+    else if (widget.level == 4)
+      _icon = Icon(FontAwesomeIcons.chessKnight);
+    else
+      _icon = Icon(FontAwesomeIcons.crown);
+
+    return _icon;
   }
 }

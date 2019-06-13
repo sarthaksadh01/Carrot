@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.simosa">
+    
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -25,8 +26,12 @@
             android:value="ca-app-pub-3940256099942544~3347511713" />
 
         <activity
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|
+            layoutDirection|fontScale|screenLayout|density|smallestScreenSize|orientation"
             android:name=".MainActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+          
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"

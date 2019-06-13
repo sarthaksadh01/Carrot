@@ -20,6 +20,7 @@ class _AddDescFullState extends State<AddDescFull> {
   Map<String, String> map = {};
   String title = "";
   String userName = "";
+  int level;
   String categoryName;
   bool loading = true;
 
@@ -158,6 +159,7 @@ class _AddDescFullState extends State<AddDescFull> {
     Firestore.instance.collection('Users').document(user.uid).get().then((doc) {
       setState(() {
         userName = doc.data['username'];
+        level = doc.data['level'];
       });
       List<String> hashAndTitle = [];
       for (int i = 0; i < hash.length; i++) {
@@ -183,7 +185,9 @@ class _AddDescFullState extends State<AddDescFull> {
                   hashtags: hashAndTitle,
                   title: title.trim(),
                   img: map[categoryName],
-                  username: userName)),
+                  username: userName,
+                  level:level
+                  )),
         );
       } else {
         Navigator.of(context).push(new MaterialPageRoute(
@@ -194,7 +198,9 @@ class _AddDescFullState extends State<AddDescFull> {
                 hashtags: hashAndTitle,
                 title: title.trim(),
                 img: map[categoryName],
-                username: userName)));
+                username: userName,
+                level: level,
+                )));
       }
     });
   }

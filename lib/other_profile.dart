@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flare_flutter/flare_actor.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:http/http.dart' as http;
 import './profile_card.dart';
+import './donate.dart';
 
 
 class OtherProfile extends StatefulWidget {
@@ -66,12 +67,9 @@ class _OtherProfileState extends State<OtherProfile> {
                                 fontWeight: FontWeight.w600,
                               ),
                             )
-                          : FlareActor(
-                              "assets/flare/loading.flr",
-                              alignment: Alignment.center,
-                              fit: BoxFit.contain,
-                              animation: "Untitled",
-                            )
+                          : CircularProgressIndicator(
+                            valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+                          )
                       : followLoading == false
                           ? Text(
                               "FOLLOW",
@@ -80,12 +78,9 @@ class _OtherProfileState extends State<OtherProfile> {
                                 fontWeight: FontWeight.w600,
                               ),
                             )
-                          : FlareActor(
-                              "assets/flare/loading.flr",
-                              alignment: Alignment.center,
-                              fit: BoxFit.contain,
-                              animation: "Untitled",
-                            ),
+                          : CircularProgressIndicator(
+                            valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+                          )
                 ),
               ),
             ),
@@ -93,7 +88,13 @@ class _OtherProfileState extends State<OtherProfile> {
           SizedBox(width: 10.0),
           Expanded(
             child: InkWell(
-              onTap: () => print("Message"),
+              onTap: () {
+                 Navigator.of(context).push(new MaterialPageRoute(
+                        settings: const RouteSettings(name: '/SignUpB'),
+                        builder: (context) => Donate(
+                          uid: widget.uid,
+                        )));
+              },
               child: Container(
                 height: 40.0,
                 decoration: BoxDecoration(
@@ -131,139 +132,145 @@ class _OtherProfileState extends State<OtherProfile> {
       ),
       body: loading == false
           ? SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                SingleChildScrollView(
-                                  child: Container(
-                    padding: EdgeInsets.only(top: 16),
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height / 2.5,
-                    decoration: BoxDecoration(
-                      color: Color(0xfffd6a02),
-                      borderRadius: BorderRadius.only(
-                          bottomRight: Radius.circular(32),
-                          bottomLeft: Radius.circular(32)),
-                    ),
-                    child: Column(
-                      children: <Widget>[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+              child: Column(
+                children: <Widget>[
+                  Stack(
+                    children: <Widget>[
+                      Container(
+                        height: 250.0,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                              colors: [Color(0xFFf45d27), Color(0xFFf5851f)]),
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(top: 50.0),
+                        height: 240.0,
+                        child: Stack(
                           children: <Widget>[
                             Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                      fit: BoxFit.fill,
-                                      image: NetworkImage(url))),
+                              padding: EdgeInsets.only(
+                                  top: 40.0,
+                                  left: 40.0,
+                                  right: 40.0,
+                                  bottom: 10.0),
+                              child: Material(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0)),
+                                elevation: 5.0,
+                                color: Colors.white,
+                                child: Column(
+                                  children: <Widget>[
+                                    SizedBox(
+                                      height: 50.0,
+                                    ),
+                                    Text(
+                                      "${widget.fullName}",
+                                      style: Theme.of(context).textTheme.title,
+                                    ),
+                                    SizedBox(
+                                      height: 5.0,
+                                    ),
+                                    Icon(Icons.whatshot),
+                                    SizedBox(
+                                      height: 16.0,
+                                    ),
+                                    Container(
+                                      height: 40.0,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Expanded(
+                                            child: ListTile(
+                                              title: Text(
+                                                "$_uploads",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              subtitle: Text(
+                                                  "Uploads".toUpperCase(),
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                      fontSize: 12.0)),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: ListTile(
+                                              title: Text(
+                                                "$_followers",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              subtitle: Text(
+                                                  "Followers".toUpperCase(),
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                      fontSize: 12.0)),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: ListTile(
+                                              title: Text(
+                                                "$_likes",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              subtitle: Text(
+                                                  "Likes".toUpperCase(),
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                      fontSize: 12.0)),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Material(
+                                  elevation: 5.0,
+                                  shape: CircleBorder(),
+                                  child: CircleAvatar(
+                                    radius: 40.0,
+                                    backgroundImage:
+                                        AssetImage('assets/images/logob.png'),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                
-                        Padding(
-                          padding: const EdgeInsets.only(top: 16, bottom: 32),
-                          child: Text(
-                            '${widget.fullName}',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 16, right: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Column(
-                                children: <Widget>[
-                                  Icon(
-                                    Icons.videocam,
-                                    color: Colors.white,
-                                  ),
-                                  Text(
-                                    'Uploads',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  Text(
-                                    '$_uploads',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                children: <Widget>[
-                                  Icon(
-                                    Icons.favorite,
-                                    color: Colors.white,
-                                  ),
-                                  Text(
-                                    'Likes',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  Text(
-                                    '$_likes',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                children: <Widget>[
-                                  Icon(
-                                    FontAwesomeIcons.solidEye,
-                                    color: Colors.white,
-                                  ),
-                                  Text(
-                                    'Viewers',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  Text(
-                                    '$_viewers',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                children: <Widget>[
-                                  Icon(
-                                    Icons.group,
-                                    color: Colors.white,
-                                  ),
-                                  Text(
-                                    'Followers',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  Text(
-                                    '$_followers',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
+                      ),
+                    ],
+                  ),
+                  Container(
+                      padding:
+                          EdgeInsets.only(left: 20.0, top: 20.0, bottom: 10.0),
+                      child: Text("Uploads",
+                          style: Theme.of(context).textTheme.title)),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: List<Widget>.generate(list.length, (index) {
+                        return list[index];
+                      }),
                     ),
                   ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                  Text("Uploads",style: TextStyle(fontSize: 30),)
-
-                ],),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: List<Widget>.generate(list.length, (index) {
-                      return list[index];
-                    }),
-                  ),
-                ),
-              ],
-            ),
-          )
+                ],
+              ),
+            )
           : Center(
               child: FlareActor(
                 "assets/flare/loading.flr",
@@ -363,6 +370,7 @@ class _OtherProfileState extends State<OtherProfile> {
         'following': FieldValue.arrayUnion([widget.uid])
       }).then((onValue) {
         setState(() {
+           _sendFollowNotification();
           followLoading = false;
           _isFollowing = true;
           _followers++;
@@ -371,5 +379,12 @@ class _OtherProfileState extends State<OtherProfile> {
     });
 
     print("follow called");
+  }
+
+    _sendFollowNotification()async{
+     var result = await http.post(
+        "http://ec2-13-235-73-103.ap-south-1.compute.amazonaws.com:3000/followNotifications/",
+        body: {"uid": widget.uid,"followedBy":user.uid});
+        print(result.body);
   }
 }

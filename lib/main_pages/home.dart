@@ -74,6 +74,7 @@ class _State extends State<Home> {
               likesList: doc['likes'],
               viewers: doc['viewers'],
               commentList: doc['comments'],
+              level: doc['level'],
             );
             setState(() {
               list.add(cardLayout);
@@ -120,6 +121,7 @@ class _State extends State<Home> {
           likesList: doc['likes'],
           viewers: doc['viewers'],
           commentList: doc['comments'],
+          level: doc['level'],
         );
         setState(() {
           list.add(cardLayout);

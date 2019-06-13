@@ -7,10 +7,13 @@ import 'package:random_string/random_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:http/http.dart' as http;
 
 class GoLive extends StatefulWidget {
   final String channelName, category, title, username, img;
   final List<String> hashtags;
+  final int level;
 
   /// Creates a call page with given channel name.
   const GoLive(
@@ -20,7 +23,8 @@ class GoLive extends StatefulWidget {
       this.hashtags,
       this.title,
       this.username,
-      this.img})
+      this.img,
+      this.level})
       : super(key: key);
 
   @override
@@ -30,9 +34,11 @@ class GoLive extends StatefulWidget {
 }
 
 class _GoLiveState extends State<GoLive> {
+  ScrollController _scrollController = new ScrollController();
   static final _sessions = List<VideoSession>();
   final _infoStrings = <String>[];
   bool muted = false;
+  String docId = "";
   String msg_uid;
 
   @override
@@ -256,29 +262,44 @@ class _GoLiveState extends State<GoLive> {
           heightFactor: 0.5,
           child: Container(
               padding: EdgeInsets.symmetric(vertical: 48),
-              child: ListView.builder(
-                  reverse: true,
-                  itemCount: _infoStrings.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    if (_infoStrings.length == 0) {
-                      return null;
-                    }
-                    return Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 3, horizontal: 10),
-                        child: Row(mainAxisSize: MainAxisSize.min, children: [
-                          Flexible(
-                              child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 2, horizontal: 5),
-                                  decoration: BoxDecoration(
-                                      color: Color(0xfffd6a02),
-                                      borderRadius: BorderRadius.circular(5)),
-                                  child: Text(_infoStrings[index],
-                                      style:
-                                          TextStyle(color: Colors.blueGrey))))
-                        ]));
-                  })),
+              child: docId != ""
+                  ? StreamBuilder(
+                      stream: Firestore.instance
+                          .collection('Live')
+                          .document(docId)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) return Container();
+                        return ListView.builder(
+                          // reverse: true,
+                          shrinkWrap: true,
+                          controller: _scrollController,
+                          itemCount: snapshot.data['comments'].length,
+                          itemBuilder: (context, position) {
+                            _scrollController.animateTo(
+                             _scrollController.position.maxScrollExtent,
+                              curve: Curves.easeOut,
+                              duration: const Duration(milliseconds: 300),
+                            );
+                            return Container(
+                             
+                              child: ListTile(
+                              
+                              title: Text(
+                                snapshot.data['comments'][position]['name'],
+                                style: TextStyle(color: Color(0xfffd6a02),fontWeight:FontWeight.w800),
+                              ),
+                              subtitle: Text(
+                                snapshot.data['comments'][position]['msg'],
+                                style: TextStyle(color: Colors.teal,fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                            );
+                          },
+                        );
+                      },
+                    )
+                  : Container()),
         ));
   }
 
@@ -327,12 +348,13 @@ class _GoLiveState extends State<GoLive> {
                     child: Row(
                       children: <Widget>[
                         Icon(
-                          Icons.live_tv,
+                          
+                          FontAwesomeIcons.solidEye,
                           color: Color(0xfffd6a02),
                         ),
                         Padding(
                           padding: EdgeInsets.only(left: 5),
-                          child: Text("${ds['viewers'].length}"),
+                          child: Text("${ds['viewers'].length}",style: TextStyle(color: Colors.teal,fontWeight: FontWeight.bold),),
                         )
                       ],
                     ),
@@ -345,27 +367,27 @@ class _GoLiveState extends State<GoLive> {
   _updateDatabase() {
     print(widget.title);
     msg_uid = widget.channelName + randomString(10);
-    Firestore.instance
-        .collection('Live')
-        .add({
-          'category': widget.category,
-          'uid': widget.channelName,
-          'username': widget.username,
-          'msg_uid': msg_uid,
-          'hashtags': widget.hashtags,
-          'viewers': [],
-          'likes': [],
-          'comments': [],
-          'time': new DateTime.now().millisecondsSinceEpoch,
-          'status': 'online',
-          'title': widget.title,
-          'img': widget.img,
-          'start_time':DateTime.now().millisecondsSinceEpoch,
-          'end_time':DateTime.now().millisecondsSinceEpoch
-
-        })
-        .then((doc) {})
-        .catchError((e) {});
+    Firestore.instance.collection('Live').add({
+      'category': widget.category,
+      'uid': widget.channelName,
+      'username': widget.username,
+      'msg_uid': msg_uid,
+      'hashtags': widget.hashtags,
+      'viewers': [],
+      'likes': [],
+      'comments': [],
+      'status': 'online',
+      'title': widget.title,
+      'img': widget.img,
+      'start_time': DateTime.now().millisecondsSinceEpoch,
+      'type':"camera",
+      "level":widget.level
+    }).then((doc) {
+      _sendNotification();
+      setState(() {
+        docId = doc.documentID;
+      });
+    }).catchError((e) {});
     // _onDisconnect();
   }
 
@@ -384,5 +406,12 @@ class _GoLiveState extends State<GoLive> {
         });
       });
     });
+  }
+
+   _sendNotification()async{
+     var result = await http.post(
+        "http://ec2-13-235-73-103.ap-south-1.compute.amazonaws.com:3000/notifications/",
+        body: {"uid": widget.channelName});
+        print(result.body);
   }
 }

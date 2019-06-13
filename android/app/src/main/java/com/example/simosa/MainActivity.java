@@ -56,6 +56,7 @@ public class MainActivity extends FlutterActivity {
 
           editor.apply();
           Intent serviceIntent = new Intent(MainActivity.this, ScreenShareService.class);
+          // startService(serviceIntent);
 
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent);

@@ -7,12 +7,13 @@ import './other_profile.dart';
 class SingleUserLayout extends StatelessWidget {
   final String username, uid;
   final followersList;
-  SingleUserLayout({this.username, this.uid, this.followersList});
+  final int level;
+  SingleUserLayout({this.username, this.uid, this.followersList, this.level});
   @override
   Widget build(BuildContext context) {
     RandomColor _randomColor;
-     Color _color;
-     _randomColor = RandomColor();
+    Color _color;
+    _randomColor = RandomColor();
     _color = _randomColor.randomColor();
     return Card(
       semanticContainer: true,
@@ -24,12 +25,14 @@ class SingleUserLayout extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 8.0, top: 5),
                 child: CircleAvatar(
-               backgroundColor:  _color,
+                  backgroundColor: _color,
                   child: Text(username[0]),
                 ),
               ),
               InkWell(
-                onTap: ()  {_navigateToProfile(context);},
+                onTap: () {
+                  _navigateToProfile(context);
+                },
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
@@ -40,8 +43,10 @@ class SingleUserLayout extends StatelessWidget {
               ),
               Spacer(),
               IconButton(
-                icon: Icon(FontAwesomeIcons.plusSquare,color: Color(0xfffd6a02),),
-                onPressed: () {_navigateToProfile(context);},
+                icon: _buildBadge(),
+                onPressed: () {
+                  _navigateToProfile(context);
+                },
               )
             ],
           ),
@@ -75,5 +80,21 @@ class SingleUserLayout extends StatelessWidget {
                 fullName: username,
               )));
     }
+  }
+
+  Widget _buildBadge() {
+    var _icon;
+    if (level == 1)
+      _icon = Icon(Icons.whatshot,color: Color(0xfffd6a02));
+    else if (level == 2)
+      _icon = Icon(FontAwesomeIcons.userNinja,color: Color(0xfffd6a02));
+    else if (level == 3)
+      _icon = Icon(FontAwesomeIcons.ghost,color: Color(0xfffd6a02));
+    else if (level == 4)
+      _icon = Icon(FontAwesomeIcons.chessKnight,color: Color(0xfffd6a02));
+    else
+      _icon = Icon(FontAwesomeIcons.crown,color: Color(0xfffd6a02));
+
+    return _icon;
   }
 }

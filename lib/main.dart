@@ -3,13 +3,17 @@ import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:loader_search_bar/loader_search_bar.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:admob_flutter/admob_flutter.dart';
-import 'package:giffy_dialog/giffy_dialog.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:achievement_view/achievement_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flare_flutter/flare_actor.dart';
 import './profile.dart';
 import './main_pages/categories.dart';
 import './main_pages/home.dart';
-import './main_pages/private.dart';
+import './main_pages/following.dart';
 import './adddesc.dart';
 import './splashscreen.dart';
 import './login.dart';
@@ -20,6 +24,7 @@ import './golive_screen.dart';
 import './main_pages/viewlive.dart';
 import './other_profile.dart';
 import './search/search.dart';
+import './donate.dart';
 
 void main() {
   Admob.initialize('ca-app-pub-3940256099942544~3347511713');
@@ -41,6 +46,7 @@ void main() {
       '/ScreenRecord': (context) => ScreenRecord(),
       '/ViewLive': (context) => ViewLive(),
       '/OtherProfile': (context) => OtherProfile(),
+      '/Donate': (context) => Donate(),
       'Search': (context) => Search()
     },
   ));
@@ -56,18 +62,20 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool logout = false;
   FirebaseAuth auth;
   FirebaseUser user;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   Categories categories = new Categories();
   Home home = new Home();
-  Private private = new Private();
+  Following following = new Following();
   String addOption;
   var currentPage;
   @override
   void initState() {
     currentPage = home;
-   _loadUser();
+    _loadUser();
+    _showAchievment();
 
     super.initState();
   }
@@ -78,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar: SearchBar(
             searchHint: 'Search hashtags',
             defaultBar: AppBar(
-              leading: Icon(Icons.games),
+              // leading: Icon(Icons.games),
               backgroundColor: Color(0xfffd6a02),
               title: Text("Carrot"),
               actions: <Widget>[
@@ -103,6 +111,50 @@ class _MyHomePageState extends State<MyHomePage> {
                       )));
             }),
         body: currentPage,
+        drawer: Drawer(
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                Padding(
+                    padding: EdgeInsets.all(80),
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Color(0xfffd6a02),
+                      child: Text(
+                        "C",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )),
+                _profileData(),
+                //  Spacer(),
+                Padding(
+                  padding: const EdgeInsets.all(30.0),
+                  child: InkWell(
+                    onTap: () async {
+                      await FirebaseAuth.instance.signOut();
+                      Navigator.pushReplacementNamed(context, '/Login');
+                    },
+                    child: Container(
+                      height: 45,
+                      // width:100 ,
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFFf45d27), Color(0xFFf5851f)],
+                          ),
+                          borderRadius: BorderRadius.all(Radius.circular(50))),
+                      child: Center(
+                          child: Text(
+                        "Logout",
+                        style: TextStyle(color: Colors.white),
+                      )),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
         floatingActionButton: FloatingActionButton(
             backgroundColor: Color(0xfffd6a02),
             onPressed: () {
@@ -115,51 +167,56 @@ class _MyHomePageState extends State<MyHomePage> {
           tabs: [
             TabData(iconData: Icons.home, title: "Home"),
             TabData(iconData: Icons.category, title: "Categories"),
-            TabData(iconData: Icons.personal_video, title: "Private"),
+            TabData(iconData: Icons.group, title: "Following"),
             TabData(iconData: Icons.trending_up, title: "Trending")
           ],
           onTabChangedListener: (position) {
             setState(() {
               if (position == 0) currentPage = home;
               if (position == 1) currentPage = categories;
-              if (position == 2) currentPage = private;
+              if (position == 2) currentPage = following;
             });
           },
         ));
   }
 
   void add() {
-    showDialog(
+    Alert(
         context: context,
-        builder: (_) => NetworkGiffyDialog(
-              buttonCancelColor: Colors.green,
-              onCancelButtonPressed: () {
-                Navigator.of(context).push(new MaterialPageRoute(
-                    settings: const RouteSettings(name: '/AddDesc'),
-                    builder: (context) => new AddDescFull(
-                          media: "Camera",
-                        )));
-              },
-              image: Image.asset('assets/images/logob.png'),
-              title: Text('Select an Option',
-                  textAlign: TextAlign.center,
-                  style:
-                      TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600)),
-              description: Text(
-                'You can go live either through device camera or through screen sharing!',
-                textAlign: TextAlign.center,
-              ),
-              onOkButtonPressed: () {
-                Navigator.of(context).push(new MaterialPageRoute(
-                    settings: const RouteSettings(name: '/AddDesc'),
-                    builder: (context) => new AddDescFull(
-                          media: "ScreenRecord",
-                        )));
-              },
-            ));
+        title: "Select an Option",
+        desc: "You can go live either through device Camera or Screen Sharing",
+        // image: Image.asset("assets/images/logob.png",height: 100,),
+        buttons: [
+          DialogButton(
+            onPressed: () {
+              Navigator.of(context).push(new MaterialPageRoute(
+                  settings: const RouteSettings(name: '/AddDesc'),
+                  builder: (context) => new AddDescFull(
+                        media: "Camera",
+                      )));
+            },
+            child: Text(
+              "Camera",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          ),
+          DialogButton(
+            onPressed: () {
+              Navigator.of(context).push(new MaterialPageRoute(
+                  settings: const RouteSettings(name: '/AddDesc'),
+                  builder: (context) => new AddDescFull(
+                        media: "ScreenRecord",
+                      )));
+            },
+            child: Text(
+              "Screen",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          )
+        ]).show();
   }
 
- _loadUser() async {
+  _loadUser() async {
     auth = FirebaseAuth.instance;
     user = await auth.currentUser();
     firebaseCloudMessagingListeners();
@@ -169,15 +226,14 @@ class _MyHomePageState extends State<MyHomePage> {
     _firebaseMessaging.getToken().then((token) {
       print(token);
     });
-   Firestore.instance.collection('Users').document(user.uid).get().then((doc){
-     for(int i=0;i<doc.data['following'].length;i++){
-       print(doc.data['following'][i]);
-       _firebaseMessaging.subscribeToTopic(doc.data['following'][i].toString());
-     }
-
-   });
-    // _firebaseMessaging.subscribeToTopic("topic");
-
+    Firestore.instance.collection('Users').document(user.uid).get().then((doc) {
+       _firebaseMessaging.subscribeToTopic(doc.data["username"]);
+      for (int i = 0; i < doc.data['following'].length; i++) {
+        print(doc.data['following'][i]);
+        _firebaseMessaging
+            .subscribeToTopic(doc.data['following'][i].toString());
+      }
+    });
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print('on message $message');
@@ -189,5 +245,116 @@ class _MyHomePageState extends State<MyHomePage> {
         print('on launch $message');
       },
     );
+  }
+
+  Widget _profileData() {
+    print("hello");
+    if (user == null) return Container();
+    return StreamBuilder(
+        stream: Firestore.instance
+            .collection('Users')
+            .document(user.uid)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return new CircularProgressIndicator();
+          }
+          var userDocument = snapshot.data;
+
+          return new Column(
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.portrait, color: Color(0xfffd6a02)),
+                title: Text("Username"),
+                subtitle: Text(userDocument["username"]),
+              ),
+              ListTile(
+                leading: Icon(Icons.email, color: Color(0xfffd6a02)),
+                title: Text("Email"),
+                subtitle: Text(userDocument["email"]),
+              ),
+              ListTile(
+                leading: Icon(Icons.phone, color: Color(0xfffd6a02)),
+                title: Text("Phone Number"),
+                subtitle: Text(userDocument["phone"]),
+              ),
+              ListTile(
+                leading: Icon(Icons.blur_circular, color: Color(0xfffd6a02)),
+                title: Text("Gender"),
+                subtitle: Text(userDocument["gender"]),
+              ),
+              ListTile(
+                leading: Icon(Icons.account_balance_wallet,
+                    color: Color(0xfffd6a02)),
+                title: Text("Wallet"),
+                subtitle: Text("0"),
+              ),
+            ],
+          );
+        });
+  }
+
+  _showAchievment() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int level = prefs.getInt('level') ?? 0;
+    print(level);
+    if (level == 0) return;
+    if (level == 2) {
+      AchievementView(context,
+          title: "Yeaaah!",
+          subTitle: "you are now a ninja",
+          icon: Icon(
+            FontAwesomeIcons.userNinja,
+            color: Colors.white,
+          ),
+          isCircle: true, listener: (status) {
+        print(status);
+      })
+        ..show();
+      await prefs.setInt('level', 0);
+    }
+    if (level == 3) {
+      AchievementView(context,
+          title: "Yeaaah!",
+          subTitle: "you are now a Ghost",
+          icon: Icon(
+            FontAwesomeIcons.ghost,
+            color: Colors.white,
+          ),
+          isCircle: true, listener: (status) {
+        print(status);
+      })
+        ..show();
+      await prefs.setInt('level', 0);
+    }
+    if (level == 4) {
+      AchievementView(context,
+          title: "Yeaaah!",
+          subTitle: "you are now a Knight",
+          icon: Icon(
+            FontAwesomeIcons.chessKnight,
+            color: Colors.white,
+          ),
+          isCircle: true, listener: (status) {
+        print(status);
+      })
+        ..show();
+      await prefs.setInt('level', 0);
+    }
+    if (level == 5) {
+      AchievementView(context,
+          title: "Yeaaah!",
+          subTitle: "you are now a King",
+          icon: Icon(
+            FontAwesomeIcons.chessKing,
+            color: Colors.white,
+          ),
+          isCircle: true, listener: (status) {
+        print(status);
+      })
+        ..show();
+
+      await prefs.setInt('level', 0);
+    }
   }
 }

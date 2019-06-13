@@ -56,6 +56,7 @@ class _UserSearchState extends State<UserSearch> {
 
           docs.documents.forEach((doc) {
             SingleUserLayout singleUserLayout = new SingleUserLayout(
+              level: doc['level'],
               uid: doc.documentID,
               username: doc['username'],
               followersList: doc['followers'],
@@ -88,6 +89,7 @@ class _UserSearchState extends State<UserSearch> {
           docs.documents.forEach((doc) {
             print(doc);
             SingleUserLayout singleUserLayout = new SingleUserLayout(
+              level: doc['level'],
               uid: doc.documentID,
               username: doc['username'],
               followersList: doc['followers'],

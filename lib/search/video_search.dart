@@ -46,8 +46,8 @@ class _VideoSearchState extends State<VideoSearch> {
         .collection('Live')
         .where('status', isEqualTo: 'online')
         .where("hashtags", arrayContains: widget.search)
-        // .orderBy("start_time", descending: true)
-        .startAfter([_lastDocument['viewers']])
+         .orderBy("start_time", descending: true)
+        .startAfter([_lastDocument['start_time']])
         .limit(5)
         .getDocuments()
         .then((docs) {
@@ -74,6 +74,7 @@ class _VideoSearchState extends State<VideoSearch> {
               likesList: doc['likes'],
               viewers: doc['viewers'],
               commentList: doc['comments'],
+              level: doc['level'],
             );
             setState(() {
               list.add(cardLayout);
@@ -93,8 +94,7 @@ class _VideoSearchState extends State<VideoSearch> {
         .collection('Live')
         .where('status', isEqualTo: 'online')
         .where("hashtags", arrayContains: widget.search)
-        //TODO orderBy("start_time", descending: true)
-        // .orderBy("start_time", descending: true)
+         .orderBy("start_time", descending: true)
         .limit(5)
         .getDocuments()
         .then((docs) {
@@ -122,6 +122,7 @@ class _VideoSearchState extends State<VideoSearch> {
           likesList: doc['likes'],
           viewers: doc['viewers'],
           commentList: doc['comments'],
+          level: doc['level'],
         );
         setState(() {
           list.add(cardLayout);

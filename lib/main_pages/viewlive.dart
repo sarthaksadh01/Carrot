@@ -7,14 +7,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:random_color/random_color.dart';
-
+import 'package:flutter_android_pip/flutter_android_pip.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+import '../donate.dart';
 
 class ViewLive extends StatefulWidget {
   final String channelName, msgUid, docId;
 
   /// Creates a call page with given channel name.
-  const ViewLive(
-      {Key key, this.channelName, this.msgUid, this.docId})
+  const ViewLive({Key key, this.channelName, this.msgUid, this.docId})
       : super(key: key);
 
   @override
@@ -33,7 +35,7 @@ class _GoLiveState extends State<ViewLive> {
   String userName = "";
   bool liked;
   final TextEditingController _msg = new TextEditingController();
-  
+  ScrollController _scrollController = new ScrollController();
 
   @override
   void dispose() {
@@ -208,8 +210,19 @@ class _GoLiveState extends State<ViewLive> {
               height: 350,
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
+                IconButton(
+                    icon: Icon(
+                      FontAwesomeIcons.solidWindowMinimize,
+                      color: Colors.green,
+                      size: 30,
+                    ),
+                    onPressed: () {
+                      _changeScreenRes();
+                      FlutterAndroidPip.enterPictureInPictureMode;
+                    }),
+                Spacer(),
                 IconButton(
                   icon: Icon(Icons.fullscreen, color: Colors.green, size: 30),
                   onPressed: () => _changeScreenRes(),
@@ -256,9 +269,44 @@ class _GoLiveState extends State<ViewLive> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
+        RawMaterialButton(
+          onPressed: () {
+            Alert(
+              context: context,
+              type: AlertType.error,
+              title: "Enjoying Stream?",
+              desc: "Donate to show support!",
+              buttons: [
+                DialogButton(
+                  child: Text(
+                    "Donate",
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).push(new MaterialPageRoute(
+                        settings: const RouteSettings(name: '/SignUpB'),
+                        builder: (context) => Donate(
+                          uid: widget.channelName,
+                        )));
+                  },
+                  width: 120,
+                )
+              ],
+            ).show();
+          },
+          child: new Icon(
+            FontAwesomeIcons.donate,
+            color: Colors.white,
+            size: 25.0,
+          ),
+          shape: new CircleBorder(),
+          elevation: 2.0,
+          fillColor: Colors.green,
+          padding: const EdgeInsets.all(10.0),
+        ),
         Expanded(
             child: Padding(
-          padding: EdgeInsets.only(left: 10),
+          padding: EdgeInsets.only(left: 0),
           child: TextField(
             controller: _msg,
             decoration: new InputDecoration(
@@ -304,9 +352,15 @@ class _GoLiveState extends State<ViewLive> {
         // DocumentSnapshot ds = snapshot.data.document;
         print(snapshot.data['comments'].length);
         return ListView.builder(
+            controller: _scrollController,
             padding: EdgeInsets.all(10),
             itemCount: snapshot.data['comments'].length,
             itemBuilder: (context, index) {
+              // _scrollController.animateTo(
+              //                _scrollController.position.maxScrollExtent,
+              //                 curve: Curves.easeOut,
+              //                 duration: const Duration(milliseconds: 300),
+              //               );
               _color = _randomColor.randomColor();
               ;
               return ListTile(
@@ -326,20 +380,21 @@ class _GoLiveState extends State<ViewLive> {
 
   void _sendMsg() async {
     if (userName == "") return;
+    if (_msg.text.trim() == "") return;
     final FirebaseAuth _auth = FirebaseAuth.instance;
     FirebaseUser user = await _auth.currentUser();
     Firestore.instance.collection('Live').document(widget.docId).updateData({
       'comments': FieldValue.arrayUnion([
         {
-          'msg': _msg.text,
+          'msg': _msg.text.trim(),
           'name': userName,
           'sender_uid': user.uid,
           'time': new DateTime.now()
         }
       ])
-    }).then((onValue) {
-      _msg.clear();
-    });
+    }).then((onValue) {});
+
+    _msg.clear();
   }
 
   void _updateLive() async {
@@ -414,6 +469,7 @@ class _GoLiveState extends State<ViewLive> {
               ? <Widget>[_viewRowsHalfScreen(), _comments(), _toolbar()]
               : <Widget>[_viewRowsHalfScreen()],
         ),
+
         // bottomNavigationBar: _toolbar(),
       ),
       onWillPop: () => _onBackPressed(),

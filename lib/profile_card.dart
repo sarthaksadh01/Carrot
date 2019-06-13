@@ -18,7 +18,7 @@ class ProfileCard extends StatelessWidget {
                 children: <Widget>[
                   Image.asset(
                     'assets/images/logob.png',
-                    height: 250,
+                    height: 200,
                   ),
                   new Center(
                     child: new ClipRect(
@@ -26,7 +26,7 @@ class ProfileCard extends StatelessWidget {
                         filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
                         child: new Container(
                           // width: 200.0,
-                          height: 250.0,
+                          height: 200.0,
                           decoration: new BoxDecoration(
                               color: Colors.grey.shade200.withOpacity(0.2)),
                           // child: new Center(

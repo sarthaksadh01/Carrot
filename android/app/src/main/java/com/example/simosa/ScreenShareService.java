@@ -14,7 +14,6 @@ import android.os.IBinder;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 
-
 import android.content.Context;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
@@ -36,27 +35,22 @@ import io.agora.rtc.ss.capture.ScreenCapture;
 import io.agora.rtc.video.AgoraVideoFrame;
 import io.agora.rtc.video.VideoEncoderConfiguration;
 
-import static android.support.v4.app.NotificationCompat.PRIORITY_DEFAULT;
 import static android.support.v4.app.NotificationCompat.PRIORITY_HIGH;
-import static android.support.v4.app.NotificationCompat.PRIORITY_MIN;
-
-
 
 public class ScreenShareService extends Service {
 
     private Socket mSocket;
     {
         try {
-            mSocket = IO.socket("http://13.235.73.103:3000/");
-        } catch (URISyntaxException e) {}
+            mSocket = IO.socket("http://ec2-13-235-73-103.ap-south-1.compute.amazonaws.com:3000/");
+        } catch (URISyntaxException e) {
+        }
     }
 
     public ScreenShareService() {
     }
 
     private static final String LOG_TAG = "AgoraScreenSharing";
-
-    private static final int PERMISSION_REQ_ID_RECORD_AUDIO = 22;
 
     private ScreenCapture mScreenCapture;
     private GLRender mScreenGLRender;
@@ -66,44 +60,57 @@ public class ScreenShareService extends Service {
     private boolean mIsLandSpace = false;
     private VideoEncoderConfiguration mVEC;
 
-    boolean isServiceRunning = false;
-
     String uid = "";
-
-
 
     @Override
     public IBinder onBind(Intent intent) {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Intent i = new Intent(this, HelloAgoraScreenSharingActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, i, 0);
 
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        String channelId = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                ? createNotificationChannel(notificationManager)
+                : "";
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId);
+        Notification notification = notificationBuilder.setOngoing(true).setSmallIcon(R.mipmap.ic_launcher)
+                .setPriority(PRIORITY_HIGH).setContentIntent(pendingIntent).setAutoCancel(true)
+                .setCategory(NotificationCompat.CATEGORY_SERVICE).setContentTitle("You are live!")
+                .addAction(R.mipmap.ic_launcher, "stop", pendingIntent).build();
+
+        startForeground(101, notification);
+       
+        return START_STICKY;
+    }
 
     @Override
     public void onCreate() {
 
-        Intent intent = new Intent(this, HelloAgoraScreenSharingActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        Intent i = new Intent(this, HelloAgoraScreenSharingActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, i, 0);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        String channelId = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? createNotificationChannel(notificationManager) : "";
+        String channelId = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                ? createNotificationChannel(notificationManager)
+                : "";
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId);
-        Notification notification = notificationBuilder.setOngoing(true)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setPriority(PRIORITY_HIGH)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
+        Notification notification = notificationBuilder.setOngoing(true).setSmallIcon(R.mipmap.ic_launcher)
+                .setPriority(PRIORITY_HIGH).setContentIntent(pendingIntent).setAutoCancel(true)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE).setContentTitle("You are live!")
-               . addAction(R.mipmap.ic_launcher, "stop",
-                       pendingIntent)
-                .build();
+                .addAction(R.mipmap.ic_launcher, "stop", pendingIntent).build();
 
         startForeground(101, notification);
 
+       
+
         SharedPreferences prefs = getSharedPreferences("MY_PREFS_NAME", MODE_PRIVATE);
         uid = prefs.getString("uid", "null");
-
 
         Toast.makeText(this, uid, Toast.LENGTH_LONG).show();
         initModules();
@@ -115,10 +122,11 @@ public class ScreenShareService extends Service {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private String createNotificationChannel(NotificationManager notificationManager){
+    private String createNotificationChannel(NotificationManager notificationManager) {
         String channelId = "my_service_channelid";
         String channelName = "My Foreground Service";
-        NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel channel = new NotificationChannel(channelId, channelName,
+                NotificationManager.IMPORTANCE_HIGH);
         // omitted the LED color
         channel.setImportance(NotificationManager.IMPORTANCE_HIGH);
         channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
@@ -135,7 +143,6 @@ public class ScreenShareService extends Service {
         mSocket.disconnect();
     }
 
-
     private void initModules() {
         DisplayMetrics metrics = new DisplayMetrics();
         WindowManager window = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
@@ -151,12 +158,12 @@ public class ScreenShareService extends Service {
         mScreenCapture.mImgTexSrcConnector.connect(new SinkConnector<ImgTexFrame>() {
             @Override
             public void onFormatChanged(Object obj) {
-                Log.d(LOG_TAG, "onFormatChanged " + obj.toString());
+                // Log.d(LOG_TAG, "onFormatChanged " + obj.toString());
             }
 
             @Override
             public void onFrameAvailable(ImgTexFrame frame) {
-                Log.d(LOG_TAG, "onFrameAvailable " + frame.toString());
+                // Log.d(LOG_TAG, "onFrameAvailable " + frame.toString());
 
                 if (mRtcEngine == null) {
                     return;
@@ -188,8 +195,11 @@ public class ScreenShareService extends Service {
                 Log.d(LOG_TAG, "onError " + err);
                 switch (err) {
                 case ScreenCapture.SCREEN_ERROR_SYSTEM_UNSUPPORTED:
+                    stoppService("Screen sharing not supported");
                     break;
                 case ScreenCapture.SCREEN_ERROR_PERMISSION_DENIED:
+                    stoppService("Permission denied");
+                    stopSelf();
                     break;
                 }
             }
@@ -227,7 +237,7 @@ public class ScreenShareService extends Service {
 
                             @Override
                             public void onAudioRouteChanged(int routing) {
-                                Log.d(LOG_TAG, "onAudioRouteChanged " + routing);
+                                // Log.d(LOG_TAG, "onAudioRouteChanged " + routing);
                             }
                         });
             } catch (Exception e) {
@@ -255,6 +265,7 @@ public class ScreenShareService extends Service {
     }
 
     private void deInitModules() {
+
         RtcEngine.destroy();
         mRtcEngine = null;
 
@@ -277,16 +288,21 @@ public class ScreenShareService extends Service {
         mScreenGLRender.init(width, height);
     }
 
-
-
     private void startCapture() {
         mScreenCapture.start();
         mSocket.connect();
-        mSocket.emit("userLive",uid);
+        mSocket.emit("userLive", uid);
 
     }
 
     private void stopCapture() {
         mScreenCapture.stop();
+    }
+
+    public void stoppService(String err) {
+
+        Toast.makeText(ScreenShareService.this, err + " nothing was recorded!", Toast.LENGTH_LONG).show();
+        stopSelf();
+
     }
 }
