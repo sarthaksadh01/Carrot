@@ -101,8 +101,8 @@ class _AddDescFullState extends State<AddDescFull> {
                   tags: hash,
                   height: 45,
                   inputDecoration: new InputDecoration(
-                    border: new OutlineInputBorder(
-                        borderSide: new BorderSide()),
+                    border:
+                        new OutlineInputBorder(borderSide: new BorderSide()),
                     hintText: 'Add hashtags',
                   ),
                 )
@@ -186,27 +186,30 @@ class _AddDescFullState extends State<AddDescFull> {
                   title: title.trim(),
                   img: map[categoryName],
                   username: userName,
-                  level:level
-                  )),
+                  level: level)),
         );
       } else {
         Navigator.of(context).push(new MaterialPageRoute(
             settings: const RouteSettings(name: '/ScreenRecord'),
             builder: (context) => new ScreenRecord(
-                channelName: user.uid,
-                category: categoryName,
-                hashtags: hashAndTitle,
-                title: title.trim(),
-                img: map[categoryName],
-                username: userName,
-                level: level,
+                  channelName: user.uid,
+                  category: categoryName,
+                  hashtags: hashAndTitle,
+                  title: title.trim(),
+                  img: map[categoryName],
+                  username: userName,
+                  level: level,
                 )));
       }
     });
   }
 
   _loadList() {
-    Firestore.instance.collection("Categories").getDocuments().then((docs) {
+    Firestore.instance
+        .collection("Categories")
+        .where("type", isEqualTo: widget.media)
+        .getDocuments()
+        .then((docs) {
       docs.documents.forEach((doc) {
         setState(() {
           // categoryName=doc.data['name'];

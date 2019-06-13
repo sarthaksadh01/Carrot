@@ -9,7 +9,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:achievement_view/achievement_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:flare_flutter/flare_actor.dart';
 import './profile.dart';
 import './main_pages/categories.dart';
 import './main_pages/home.dart';
@@ -25,6 +24,7 @@ import './main_pages/viewlive.dart';
 import './other_profile.dart';
 import './search/search.dart';
 import './donate.dart';
+import './wallet.dart';
 
 void main() {
   Admob.initialize('ca-app-pub-3940256099942544~3347511713');
@@ -47,6 +47,7 @@ void main() {
       '/ViewLive': (context) => ViewLive(),
       '/OtherProfile': (context) => OtherProfile(),
       '/Donate': (context) => Donate(),
+      '/Wallet': (context) => Wallet(),
       'Search': (context) => Search()
     },
   ));
@@ -62,6 +63,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String username = " ";
   bool logout = false;
   FirebaseAuth auth;
   FirebaseUser user;
@@ -121,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       radius: 50,
                       backgroundColor: Color(0xfffd6a02),
                       child: Text(
-                        "C",
+                        username[0],
                         style: TextStyle(color: Colors.white),
                       ),
                     )),
@@ -166,13 +168,17 @@ class _MyHomePageState extends State<MyHomePage> {
           inactiveIconColor: Color(0xfffd6a02),
           tabs: [
             TabData(iconData: Icons.home, title: "Home"),
+            // TabData(iconData: Icons.add_circle, title: "Add"),
             TabData(iconData: Icons.category, title: "Categories"),
             TabData(iconData: Icons.group, title: "Following"),
-            TabData(iconData: Icons.trending_up, title: "Trending")
           ],
           onTabChangedListener: (position) {
             setState(() {
               if (position == 0) currentPage = home;
+              // if(position==1) {
+              //   add();
+              //   position=0;
+              // }
               if (position == 1) currentPage = categories;
               if (position == 2) currentPage = following;
             });
@@ -227,7 +233,7 @@ class _MyHomePageState extends State<MyHomePage> {
       print(token);
     });
     Firestore.instance.collection('Users').document(user.uid).get().then((doc) {
-       _firebaseMessaging.subscribeToTopic(doc.data["username"]);
+      _firebaseMessaging.subscribeToTopic(doc.data["username"]);
       for (int i = 0; i < doc.data['following'].length; i++) {
         print(doc.data['following'][i]);
         _firebaseMessaging
@@ -248,6 +254,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _profileData() {
+    setState(() {});
     print("hello");
     if (user == null) return Container();
     return StreamBuilder(
@@ -260,6 +267,8 @@ class _MyHomePageState extends State<MyHomePage> {
             return new CircularProgressIndicator();
           }
           var userDocument = snapshot.data;
+
+          username = userDocument["username"];
 
           return new Column(
             children: <Widget>[
@@ -287,7 +296,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 leading: Icon(Icons.account_balance_wallet,
                     color: Color(0xfffd6a02)),
                 title: Text("Wallet"),
-                subtitle: Text("0"),
+                subtitle: Text("\u20B9 ${userDocument["wallet"]}"),
               ),
             ],
           );

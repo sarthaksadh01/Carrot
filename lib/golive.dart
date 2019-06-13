@@ -380,7 +380,7 @@ class _GoLiveState extends State<GoLive> {
       'title': widget.title,
       'img': widget.img,
       'start_time': DateTime.now().millisecondsSinceEpoch,
-      'type':"camera",
+      'type':"Camera",
       "level":widget.level
     }).then((doc) {
       _sendNotification();

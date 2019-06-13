@@ -284,7 +284,7 @@ class _GoLiveState extends State<ViewLive> {
                   ),
                   onPressed: () {
                     Navigator.of(context).push(new MaterialPageRoute(
-                        settings: const RouteSettings(name: '/SignUpB'),
+                        settings: const RouteSettings(name: '/Donate'),
                         builder: (context) => Donate(
                           uid: widget.channelName,
                         )));

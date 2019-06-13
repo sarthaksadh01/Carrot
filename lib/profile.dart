@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:steps/steps.dart';
 import './profile_card.dart';
+import './wallet.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -201,7 +202,12 @@ class _ProfileState extends State<Profile> {
             bottomNavigationBar: Padding(
                   padding: const EdgeInsets.all(30.0),
                   child: InkWell(
-                    onTap: () async {
+                    onTap: ()  {
+                       Navigator.of(context).push(new MaterialPageRoute(
+                        settings: const RouteSettings(name: '/Wallet'),
+                        builder: (context) => Wallet(
+                          uid: user.uid
+                        )));
                     },
                     child: Container(
                       height: 45,

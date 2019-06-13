@@ -300,7 +300,8 @@ class _SignupBFullState extends State<SignupBFull> {
         'time': new DateTime.now().millisecondsSinceEpoch,
         'level': 1,
         'followers': FieldValue.arrayUnion([]),
-        'following': []
+        'following': [],
+        'wallet':0
       }).then((onValue) {
         Navigator.pushReplacementNamed(context, '/Home');
       }).catchError((e) {

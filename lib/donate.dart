@@ -3,6 +3,7 @@ import 'package:flare_flutter/flare_actor.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_upi/flutter_upi.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class Donate extends StatefulWidget {
   final String uid;
@@ -110,66 +111,11 @@ class _DonateState extends State<Donate> {
                         minWidth: MediaQuery.of(context).size.width,
                         height: 20,
                         child: Image.asset(
-                          "assets/images/truecaller.jpg",
+                          "assets/images/pytm.jpeg",
                           height: 50,
                         ),
                         onPressed: () {
-                          _donate(FlutterUpiApps.TrueCallerUPI);
-                        },
-                      ),
-                      MaterialButton(
-                        minWidth: MediaQuery.of(context).size.width,
-                        height: 20,
-                        child: Image.asset(
-                          "assets/images/amazon.png",
-                          height: 50,
-                        ),
-                        onPressed: () {
-                          _donate(FlutterUpiApps.AmazonPay);
-                        },
-                      ),
-                      MaterialButton(
-                        minWidth: MediaQuery.of(context).size.width,
-                        height: 20,
-                        child: Image.asset(
-                          "assets/images/airtel.png",
-                          height: 50,
-                        ),
-                        onPressed: () {
-                          _donate(FlutterUpiApps.MyAirtelUPI);
-                        },
-                      ),
-                      MaterialButton(
-                        minWidth: MediaQuery.of(context).size.width,
-                        height: 20,
-                        child: Image.asset(
-                          "assets/images/bhim.jpg",
-                          height: 50,
-                        ),
-                        onPressed: () {
-                          _donate(FlutterUpiApps.BHIMUPI);
-                        },
-                      ),
-                      MaterialButton(
-                        minWidth: MediaQuery.of(context).size.width,
-                        height: 20,
-                        child: Image.asset(
-                          "assets/images/mipay.jpeg",
-                          height: 50,
-                        ),
-                        onPressed: () {
-                          _donate(FlutterUpiApps.MiPay);
-                        },
-                      ),
-                      MaterialButton(
-                        minWidth: MediaQuery.of(context).size.width,
-                        height: 20,
-                        child: Image.asset(
-                          "assets/images/phonepe.png",
-                          height: 50,
-                        ),
-                        onPressed: () {
-                          _donate(FlutterUpiApps.PhonePe);
+                          _donate(FlutterUpiApps.PayTM);
                         },
                       ),
                       MaterialButton(
@@ -187,11 +133,55 @@ class _DonateState extends State<Donate> {
                         minWidth: MediaQuery.of(context).size.width,
                         height: 20,
                         child: Image.asset(
-                          "assets/images/pytm.jpeg",
+                          "assets/images/phonepe.png",
                           height: 50,
                         ),
                         onPressed: () {
-                          _donate(FlutterUpiApps.PayTM);
+                          _donate(FlutterUpiApps.PhonePe);
+                        },
+                      ),
+                      MaterialButton(
+                        minWidth: MediaQuery.of(context).size.width,
+                        height: 20,
+                        child: Image.asset(
+                          "assets/images/bhim.jpg",
+                          height: 50,
+                        ),
+                        onPressed: () {
+                          _donate(FlutterUpiApps.BHIMUPI);
+                        },
+                      ),
+                      MaterialButton(
+                        minWidth: MediaQuery.of(context).size.width,
+                        height: 20,
+                        child: Image.asset(
+                          "assets/images/airtel.png",
+                          height: 50,
+                        ),
+                        onPressed: () {
+                          _donate(FlutterUpiApps.MyAirtelUPI);
+                        },
+                      ),
+                      MaterialButton(
+                        minWidth: MediaQuery.of(context).size.width,
+                        height: 20,
+                        child: Image.asset(
+                          "assets/images/mipay.jpeg",
+                          height: 50,
+                        ),
+                        onPressed: () {
+                          _donate(FlutterUpiApps.MiPay);
+                        },
+                      ),
+                      MaterialButton(
+                        minWidth: MediaQuery.of(context).size.width,
+                        height: 20,
+                        child: Image.asset(
+                          "assets/images/truecaller.jpg",
+                          height: 50,
+                        ),
+                        onPressed: () {
+                          _donate(FlutterUpiApps.TrueCallerUPI);
                         },
                       ),
                     ],
@@ -226,13 +216,25 @@ class _DonateState extends State<Donate> {
   }
 
   _donate(var appName) async {
-    if (amount == null) return;
+    print("proccess");
+    if (amount == null) {
+      Alert(
+              context: context,
+              title: "Error Occured",
+              desc: "Please select a valid amount!")
+          .show();
+      return;
+    }
 
     String amnt = amount;
 
+    setState(() {
+      loading = true;
+    });
+
     String response = await FlutterUpi.initiateTransaction(
       app: appName,
-      pa: "8076911425@paytm",
+      pa: "avikmika@okicici",
       pn: "Carrot",
       tr: "UniqueTransactionId",
       tn: "donate $amount to $username",
@@ -242,13 +244,46 @@ class _DonateState extends State<Donate> {
       url: "https://www.google.com",
     );
 
+    if (response == "app_not_installed") {
+      setState(() {
+        loading = false;
+      });
+      Alert(
+              context: context,
+              title: "Error Occured",
+              desc: "Upi app not installed")
+          .show();
+      return;
+    }
+    if (response == "invalid_params" ||
+        response == "null_response" ||
+        response == "user_canceled") {
+      setState(() {
+        loading = false;
+      });
+      Alert(
+              context: context,
+              title: "Error Occured",
+              desc: "Pyment canceled by the user!")
+          .show();
+      return;
+    }
+
     FlutterUpiResponse flutterUpiResponse = FlutterUpiResponse(response);
+    print(response);
     print(flutterUpiResponse.ApprovalRefNo);
     print(flutterUpiResponse.responseCode);
     print(flutterUpiResponse.txnId);
     print(flutterUpiResponse.txnRef);
     print(flutterUpiResponse.Status);
-    if(flutterUpiResponse.Status=="SUCCESS")_saveTransaction(amnt, flutterUpiResponse.txnId);
+    if (flutterUpiResponse.Status == "SUCCESS")
+      _saveTransaction(amnt, flutterUpiResponse.txnId);
+    else {
+      Alert(
+        context: context,
+        title: "Error Occured",
+      ).show();
+    }
   }
 
   _saveTransaction(String amnt, String txID) async {
@@ -261,11 +296,13 @@ class _DonateState extends State<Donate> {
       });
 
       Firestore.instance.collection("Txn").add({
+        "between": [user.uid, widget.uid],
         "amnt": amnt,
         "donated_by": user.uid,
         "donated_to": widget.uid,
         "msg": msg,
         "donated_by_username": myName,
+        "donate_to_username": username,
         "txId": txID,
         "time": DateTime.now().millisecondsSinceEpoch
       }).then((onValue) {
@@ -275,10 +312,51 @@ class _DonateState extends State<Donate> {
           DocumentSnapshot walletSnapshot = await tx.get(walletRef);
           if (walletSnapshot.exists) {
             await tx.update(walletRef, <String, dynamic>{
-              'wallet': walletSnapshot.data['wallet'] + amnt
+              'wallet': walletSnapshot.data['wallet'] + int.parse(amnt)
+            }).then((onValue) {
+              setState(() {
+                loading = false;
+              });
+              Alert(
+                context: context,
+                type: AlertType.success,
+                title: "Success!",
+                buttons: [
+                  DialogButton(
+                    child: Text(
+                      "Cool",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    width: 120,
+                  )
+                ],
+              ).show();
+            }).catchError((onError) {
+              setState(() {
+                loading = false;
+              });
+              Alert(
+                      context: context,
+                      title: "Error Occured",
+                      desc:
+                          "$amnt will be refunded if not in 3 days please contact us with txID: $txID")
+                  .show();
             });
           }
         });
+      }).catchError((onError) {
+        setState(() {
+          loading = false;
+        });
+        Alert(
+                context: context,
+                title: "Error Occured",
+                desc:
+                    "$amnt will be refunded if not in 3 days please contact us with txID: $txID")
+            .show();
       });
     });
   }

@@ -161,7 +161,7 @@ class _ScreenRecordState extends State<ScreenRecord> {
       'img': widget.img,
       'start_time': DateTime.now().millisecondsSinceEpoch,
       'level':widget.level,
-       'type':"screen"
+       'type':"ScreenRecord"
     }).then((doc) {
       _sendNotification();
       setState(() {
