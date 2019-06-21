@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import './profile_card.dart';
 import './donate.dart';
 
-
 class OtherProfile extends StatefulWidget {
   OtherProfile({this.fullName, this.uid});
   final String fullName, uid;
@@ -15,6 +14,7 @@ class OtherProfile extends StatefulWidget {
 }
 
 class _OtherProfileState extends State<OtherProfile> {
+  String uPic = "";
   int _likes = 0;
   int _viewers = 0;
   int _followers = 0;
@@ -32,10 +32,6 @@ class _OtherProfileState extends State<OtherProfile> {
 
     super.initState();
   }
-
-
-
-
 
   Widget _buildButtons() {
     return Padding(
@@ -58,30 +54,31 @@ class _OtherProfileState extends State<OtherProfile> {
                   color: Color(0xfffd6a02),
                 ),
                 child: Center(
-                  child: _isFollowing
-                      ? followLoading == false
-                          ? Text(
-                              "UNFOLLOW",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            )
-                          : CircularProgressIndicator(
-                            valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
-                          )
-                      : followLoading == false
-                          ? Text(
-                              "FOLLOW",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            )
-                          : CircularProgressIndicator(
-                            valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
-                          )
-                ),
+                    child: _isFollowing
+                        ? followLoading == false
+                            ? Text(
+                                "UNFOLLOW",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              )
+                            : CircularProgressIndicator(
+                                valueColor: new AlwaysStoppedAnimation<Color>(
+                                    Colors.white),
+                              )
+                        : followLoading == false
+                            ? Text(
+                                "FOLLOW",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              )
+                            : CircularProgressIndicator(
+                                valueColor: new AlwaysStoppedAnimation<Color>(
+                                    Colors.white),
+                              )),
               ),
             ),
           ),
@@ -89,9 +86,9 @@ class _OtherProfileState extends State<OtherProfile> {
           Expanded(
             child: InkWell(
               onTap: () {
-                 Navigator.of(context).push(new MaterialPageRoute(
-                        settings: const RouteSettings(name: '/SignUpB'),
-                        builder: (context) => Donate(
+                Navigator.of(context).push(new MaterialPageRoute(
+                    settings: const RouteSettings(name: '/SignUpB'),
+                    builder: (context) => Donate(
                           uid: widget.uid,
                         )));
               },
@@ -119,7 +116,7 @@ class _OtherProfileState extends State<OtherProfile> {
 
   @override
   Widget build(BuildContext context) {
-        final String url =
+    final String url =
         'https://static.independent.co.uk/s3fs-public/thumbnails/image/2018/09/04/15/lionel-messi-0.jpg?';
     Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
@@ -244,8 +241,7 @@ class _OtherProfileState extends State<OtherProfile> {
                                   shape: CircleBorder(),
                                   child: CircleAvatar(
                                     radius: 40.0,
-                                    backgroundImage:
-                                        AssetImage('assets/images/logob.png'),
+                                    backgroundImage: NetworkImage(uPic),
                                   ),
                                 ),
                               ],
@@ -320,7 +316,7 @@ class _OtherProfileState extends State<OtherProfile> {
           .get()
           .then((doc) {
         List<String> flwrs = List.from(doc.data['followers']);
-            for (int i = 0; i < flwrs.length; i++) {
+        for (int i = 0; i < flwrs.length; i++) {
           if (flwrs[i] == user.uid) {
             setState(() {
               _isFollowing = true;
@@ -331,11 +327,11 @@ class _OtherProfileState extends State<OtherProfile> {
         setState(() {
           _followers = flwrs.length;
           loading = false;
-          followLoading=false;
+          followLoading = false;
+          uPic = doc.data['pic'];
         });
       });
     });
-
   }
 
   _unfollow() {
@@ -370,7 +366,7 @@ class _OtherProfileState extends State<OtherProfile> {
         'following': FieldValue.arrayUnion([widget.uid])
       }).then((onValue) {
         setState(() {
-           _sendFollowNotification();
+          _sendFollowNotification();
           followLoading = false;
           _isFollowing = true;
           _followers++;
@@ -381,10 +377,10 @@ class _OtherProfileState extends State<OtherProfile> {
     print("follow called");
   }
 
-    _sendFollowNotification()async{
-     var result = await http.post(
+  _sendFollowNotification() async {
+    var result = await http.post(
         "http://ec2-13-235-73-103.ap-south-1.compute.amazonaws.com:3000/followNotifications/",
-        body: {"uid": widget.uid,"followedBy":user.uid});
-        print(result.body);
+        body: {"uid": widget.uid, "followedBy": user.uid});
+    print(result.body);
   }
 }

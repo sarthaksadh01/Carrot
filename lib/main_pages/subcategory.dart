@@ -80,6 +80,7 @@ class _SubCategoryFullState extends State<SubCategoryFull> {
               viewers: doc['viewers'],
               commentList: doc['comments'],
               level: doc['level'],
+              uPic: doc['upic'],
             );
             setState(() {
               list.add(cardLayout);
@@ -128,6 +129,7 @@ class _SubCategoryFullState extends State<SubCategoryFull> {
           viewers: doc['viewers'],
           commentList: doc['comments'],
           level: doc['level'],
+          uPic: doc['upic'],
         );
 
         setState(() {

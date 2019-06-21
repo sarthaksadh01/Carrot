@@ -93,6 +93,7 @@ class _UserSearchState extends State<UserSearch> {
               uid: doc.documentID,
               username: doc['username'],
               followersList: doc['followers'],
+              uPic: doc['pic'],
             );
             setState(() {
               list.add(singleUserLayout);

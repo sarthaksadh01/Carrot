@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_upi/flutter_upi.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:http/http.dart' as http;
 
 class Donate extends StatefulWidget {
   final String uid;
@@ -234,7 +235,7 @@ class _DonateState extends State<Donate> {
 
     String response = await FlutterUpi.initiateTransaction(
       app: appName,
-      pa: "avikmika@okicici",
+      pa: "8076911425@paytm",
       pn: "Carrot",
       tr: "UniqueTransactionId",
       tn: "donate $amount to $username",
@@ -317,6 +318,7 @@ class _DonateState extends State<Donate> {
               setState(() {
                 loading = false;
               });
+              _sendFollowNotification(user.uid, amnt);
               Alert(
                 context: context,
                 type: AlertType.success,
@@ -359,5 +361,12 @@ class _DonateState extends State<Donate> {
             .show();
       });
     });
+  }
+
+  _sendFollowNotification(String s_uid, String amnt) async {
+    var result = await http.post(
+        "http://ec2-13-235-73-103.ap-south-1.compute.amazonaws.com:3000/donateNotifications/",
+        body: {"r_uid": widget.uid, "s_uid": s_uid, "amnt": amnt, "msg": msg});
+    print(result.body);
   }
 }

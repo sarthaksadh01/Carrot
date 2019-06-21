@@ -133,7 +133,7 @@ class _LoginState extends State<LoginFull> {
                       alignment: Alignment.centerRight,
                       child: InkWell(
                         onTap: () =>
-                            Navigator.pushReplacementNamed(context, '/SignUpA'),
+                            Navigator.pushReplacementNamed(context, '/SignUpB'),
                         child: Padding(
                           padding: const EdgeInsets.only(top: 16, right: 32),
                           child: Text(

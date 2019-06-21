@@ -5,10 +5,10 @@ import 'package:random_color/random_color.dart';
 import './other_profile.dart';
 
 class SingleUserLayout extends StatelessWidget {
-  final String username, uid;
+  final String username, uid,uPic;
   final followersList;
   final int level;
-  SingleUserLayout({this.username, this.uid, this.followersList, this.level});
+  SingleUserLayout({this.username, this.uid, this.followersList, this.level,this.uPic});
   @override
   Widget build(BuildContext context) {
     RandomColor _randomColor;
@@ -26,7 +26,8 @@ class SingleUserLayout extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 8.0, top: 5),
                 child: CircleAvatar(
                   backgroundColor: _color,
-                  child: Text(username[0]),
+                   backgroundImage:NetworkImage(uPic) ,
+                 
                 ),
               ),
               InkWell(

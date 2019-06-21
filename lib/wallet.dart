@@ -99,7 +99,7 @@ class _WalletState extends State<Wallet> {
               leading: Icon(FontAwesomeIcons.donate,color: Colors.pink,),
               isThreeLine: true,
               title: Text("\u20B9 ${doc.data['amnt']}"),
-              subtitle: Text("to ${doc.data['donated_to_username']}"),
+              subtitle: Text("to ${doc.data['donate_to_username']}"),
               // trailing: Text("${date.day}/${date.month}/${date.year}"),
             ));
           } else {

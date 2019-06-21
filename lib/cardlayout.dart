@@ -8,7 +8,7 @@ import './main_pages/viewlive.dart';
 import 'dart:ui';
 
 class CardLayout extends StatefulWidget {
-  final String uid, username, msgUid, title, category, hashtags, img, docId;
+  final String uid, username, msgUid, title, category, hashtags, img, docId,uPic;
   final likesList, viewers, commentList;
   final int level;
   // final int 
@@ -25,7 +25,8 @@ class CardLayout extends StatefulWidget {
       this.likesList,
       this.viewers,
       this.commentList,
-      this.level});
+      this.level,
+      this.uPic});
   @override
   CardLayout_State createState() => CardLayout_State();
 }
@@ -56,7 +57,8 @@ class CardLayout_State extends State<CardLayout> {
               Padding(
                 padding: const EdgeInsets.only(left: 8.0, top: 5),
                 child: CircleAvatar(
-                  backgroundColor: _color,
+                  backgroundImage:NetworkImage(widget.uPic) ,
+                   backgroundColor: _color,
                   child: Text(widget.username[0]),
                 ),
               ),

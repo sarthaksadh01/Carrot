@@ -6,26 +6,30 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupBFull extends StatefulWidget {
-  final String name, email, photo;
-  const SignupBFull({Key key, this.name, this.email, this.photo})
-      : super(key: key);
+  // final String name, email, photo;
+  // const SignupBFull({Key key, this.name, this.email, this.photo})
+  //     : super(key: key);
   @override
-  _SignupBFullState createState() => _SignupBFullState(name, email, photo);
+  _SignupBFullState createState() => _SignupBFullState();
 }
 
 class _SignupBFullState extends State<SignupBFull> {
-  String name, email, photo;
-  _SignupBFullState(this.name, this.email, this.photo);
+  // _SignupBFullState(this.name, this.email, this.photo);
   DateTime t;
   bool otp = false, vfy = false, loading = false;
-  String uname = "", phone = "", password = "", gender = "";
+  String uname = "",
+      phone = "",
+      password = "",
+      gender = "",
+      email = "",
+      name = "";
   final TextEditingController _uname = new TextEditingController();
   final TextEditingController _pno = new TextEditingController();
   @override
-  void initState() {
-    if (photo == null) photo = "null";
-    super.initState();
-  }
+  // void initState() {
+  //   if (photo == null) photo = "null";
+  //   super.initState();
+  // }
 
   var bdate = new TextEditingController();
   @override
@@ -45,6 +49,21 @@ class _SignupBFullState extends State<SignupBFull> {
               height: 200,
             ),
           ),
+          Padding(
+              padding: EdgeInsets.fromLTRB(30, 0, 30, 10),
+              child: TextField(
+                keyboardType: TextInputType.emailAddress,
+                onChanged: (val) {
+                  setState(() {
+                    email = val;
+                  });
+                },
+                decoration: new InputDecoration(
+                    prefixIcon: Icon(Icons.email),
+                    hintText: "Email",
+                    border: new OutlineInputBorder(
+                        borderSide: new BorderSide(color: Colors.teal))),
+              )),
           Padding(
               padding: EdgeInsets.fromLTRB(30, 20, 30, 10),
               child: TextField(
@@ -240,7 +259,7 @@ class _SignupBFullState extends State<SignupBFull> {
           fontSize: 16.0);
       return;
     }
-    if (gender.trim() == null || t == null) {
+    if (gender.trim() == null || t == null||email.trim()=="") {
       Fluttertoast.showToast(
           msg: "All fields are required!",
           toastLength: Toast.LENGTH_SHORT,
@@ -296,12 +315,12 @@ class _SignupBFullState extends State<SignupBFull> {
         'phone': phone.trim(),
         "dob": t.toString(),
         'gender': gender,
-        'pic': photo,
+        'pic': 'https://robohash.org/' + uname.trim() + '.png?set=set5',
         'time': new DateTime.now().millisecondsSinceEpoch,
         'level': 1,
         'followers': FieldValue.arrayUnion([]),
         'following': [],
-        'wallet':0
+        'wallet': 0
       }).then((onValue) {
         Navigator.pushReplacementNamed(context, '/Home');
       }).catchError((e) {

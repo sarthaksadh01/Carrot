@@ -20,6 +20,7 @@ class _AddDescFullState extends State<AddDescFull> {
   Map<String, String> map = {};
   String title = "";
   String userName = "";
+  String upic;
   int level;
   String categoryName;
   bool loading = true;
@@ -160,6 +161,7 @@ class _AddDescFullState extends State<AddDescFull> {
       setState(() {
         userName = doc.data['username'];
         level = doc.data['level'];
+        upic = doc.data['pic'];
       });
       List<String> hashAndTitle = [];
       for (int i = 0; i < hash.length; i++) {
@@ -180,13 +182,15 @@ class _AddDescFullState extends State<AddDescFull> {
           context,
           MaterialPageRoute(
               builder: (context) => GoLive(
-                  channelName: user.uid,
-                  category: categoryName,
-                  hashtags: hashAndTitle,
-                  title: title.trim(),
-                  img: map[categoryName],
-                  username: userName,
-                  level: level)),
+                    channelName: user.uid,
+                    category: categoryName,
+                    hashtags: hashAndTitle,
+                    title: title.trim(),
+                    img: map[categoryName],
+                    username: userName,
+                    level: level,
+                    uPic: upic,
+                  )),
         );
       } else {
         Navigator.of(context).push(new MaterialPageRoute(
@@ -199,6 +203,7 @@ class _AddDescFullState extends State<AddDescFull> {
                   img: map[categoryName],
                   username: userName,
                   level: level,
+                  uPic: upic,
                 )));
       }
     });

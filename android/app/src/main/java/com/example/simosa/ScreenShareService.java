@@ -11,8 +11,6 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.IBinder;
 
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Socket;
 
 import android.content.Context;
 import android.support.annotation.RequiresApi;
@@ -24,6 +22,10 @@ import android.widget.Toast;
 import android.content.SharedPreferences;
 
 import java.net.URISyntaxException;
+
+import io.socket.client.Socket;
+import io.socket.client.IO;
+import io.socket.emitter.Emitter;
 
 import io.agora.rtc.Constants;
 import io.agora.rtc.IRtcEngineEventHandler;
@@ -39,16 +41,9 @@ import static android.support.v4.app.NotificationCompat.PRIORITY_HIGH;
 
 public class ScreenShareService extends Service {
 
-    private Socket mSocket;
-    {
-        try {
-            mSocket = IO.socket("http://ec2-13-235-73-103.ap-south-1.compute.amazonaws.com:3000/");
-        } catch (URISyntaxException e) {
-        }
-    }
+     Socket socket;
 
-    public ScreenShareService() {
-    }
+   
 
     private static final String LOG_TAG = "AgoraScreenSharing";
 
@@ -84,7 +79,7 @@ public class ScreenShareService extends Service {
                 .addAction(R.mipmap.ic_launcher, "stop", pendingIntent).build();
 
         startForeground(101, notification);
-       
+
         return START_STICKY;
     }
 
@@ -107,12 +102,38 @@ public class ScreenShareService extends Service {
 
         startForeground(101, notification);
 
-       
-
         SharedPreferences prefs = getSharedPreferences("MY_PREFS_NAME", MODE_PRIVATE);
         uid = prefs.getString("uid", "null");
-
-        Toast.makeText(this, uid, Toast.LENGTH_LONG).show();
+        try{
+            socket = IO.socket("http://ec2-13-235-73-103.ap-south-1.compute.amazonaws.com/");
+            
+            socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+            
+                @Override
+                public void call(Object... args) {
+                    socket.emit("userLive", uid);
+                    // socket.disconnect();
+                }
+            
+            }).on("message", new Emitter.Listener() {
+                    //message is the keyword for communication exchanges
+                @Override
+                public void call(Object... args) {
+                    socket.emit("message", "hi");
+                }
+            
+            }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+            
+                @Override
+                public void call(Object... args) {}
+            
+            });
+                socket.connect();
+            
+            }
+            catch(Exception e){
+            
+            }
         initModules();
         startCapture();
         mRtcEngine.muteAllRemoteAudioStreams(true);
@@ -140,7 +161,7 @@ public class ScreenShareService extends Service {
         mRtcEngine.leaveChannel();
         stopCapture();
         deInitModules();
-        mSocket.disconnect();
+        // mSocket.disconnect();
     }
 
     private void initModules() {
@@ -199,7 +220,7 @@ public class ScreenShareService extends Service {
                     break;
                 case ScreenCapture.SCREEN_ERROR_PERMISSION_DENIED:
                     stoppService("Permission denied");
-                    stopSelf();
+                    // stopSelf();
                     break;
                 }
             }
@@ -222,6 +243,8 @@ public class ScreenShareService extends Service {
                             @Override
                             public void onJoinChannelSuccess(String channel, int uid, int elapsed) {
                                 Log.d(LOG_TAG, "onJoinChannelSuccess " + channel + " " + elapsed);
+                                // mSocket.connect();
+                                // mSocket.emit("userLive", ScreenShareService.this.uid);
 
                             }
 
@@ -233,6 +256,7 @@ public class ScreenShareService extends Service {
                             @Override
                             public void onError(int err) {
                                 Log.d(LOG_TAG, "onError " + err);
+                                stoppService("err");
                             }
 
                             @Override
@@ -242,6 +266,7 @@ public class ScreenShareService extends Service {
                         });
             } catch (Exception e) {
                 Log.e(LOG_TAG, Log.getStackTraceString(e));
+                stoppService("Error");
 
                 throw new RuntimeException("NEED TO check rtc sdk init fatal error\n" + Log.getStackTraceString(e));
             }
@@ -290,8 +315,8 @@ public class ScreenShareService extends Service {
 
     private void startCapture() {
         mScreenCapture.start();
-        mSocket.connect();
-        mSocket.emit("userLive", uid);
+        // mSocket.connect();
+        // mSocket.emit("userLive", uid);
 
     }
 
@@ -302,6 +327,7 @@ public class ScreenShareService extends Service {
     public void stoppService(String err) {
 
         Toast.makeText(ScreenShareService.this, err + " nothing was recorded!", Toast.LENGTH_LONG).show();
+        // mSocket.disconnect();
         stopSelf();
 
     }

@@ -5,13 +5,12 @@ import './agora_utils/videosession.dart';
 import './agora_utils/settings.dart';
 import 'package:random_string/random_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:socket_flutter_plugin/socket_flutter_plugin.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 
 class GoLive extends StatefulWidget {
-  final String channelName, category, title, username, img;
+  final String channelName, category, title, username, img,uPic;
   final List<String> hashtags;
   final int level;
 
@@ -24,7 +23,8 @@ class GoLive extends StatefulWidget {
       this.title,
       this.username,
       this.img,
-      this.level})
+      this.level,
+      this.uPic})
       : super(key: key);
 
   @override
@@ -277,23 +277,25 @@ class _GoLiveState extends State<GoLive> {
                           itemCount: snapshot.data['comments'].length,
                           itemBuilder: (context, position) {
                             _scrollController.animateTo(
-                             _scrollController.position.maxScrollExtent,
+                              _scrollController.position.maxScrollExtent,
                               curve: Curves.easeOut,
                               duration: const Duration(milliseconds: 300),
                             );
                             return Container(
-                             
                               child: ListTile(
-                              
-                              title: Text(
-                                snapshot.data['comments'][position]['name'],
-                                style: TextStyle(color: Color(0xfffd6a02),fontWeight:FontWeight.w800),
+                                title: Text(
+                                  snapshot.data['comments'][position]['name'],
+                                  style: TextStyle(
+                                      color: Color(0xfffd6a02),
+                                      fontWeight: FontWeight.w800),
+                                ),
+                                subtitle: Text(
+                                  snapshot.data['comments'][position]['msg'],
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w900),
+                                ),
                               ),
-                              subtitle: Text(
-                                snapshot.data['comments'][position]['msg'],
-                                style: TextStyle(color: Colors.teal,fontWeight: FontWeight.w600),
-                              ),
-                            ),
                             );
                           },
                         );
@@ -348,13 +350,17 @@ class _GoLiveState extends State<GoLive> {
                     child: Row(
                       children: <Widget>[
                         Icon(
-                          
                           FontAwesomeIcons.solidEye,
                           color: Color(0xfffd6a02),
                         ),
                         Padding(
                           padding: EdgeInsets.only(left: 5),
-                          child: Text("${ds['viewers'].length}",style: TextStyle(color: Colors.teal,fontWeight: FontWeight.bold),),
+                          child: Text(
+                            "${ds['viewers'].length}",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900 ),
+                          ),
                         )
                       ],
                     ),
@@ -380,15 +386,25 @@ class _GoLiveState extends State<GoLive> {
       'title': widget.title,
       'img': widget.img,
       'start_time': DateTime.now().millisecondsSinceEpoch,
-      'type':"Camera",
-      "level":widget.level
+      'type': "Camera",
+      "level": widget.level,
+      "upic":widget.uPic
     }).then((doc) {
+      _socketConnection();
       _sendNotification();
       setState(() {
         docId = doc.documentID;
       });
     }).catchError((e) {});
     // _onDisconnect();
+  }
+
+  _socketConnection() {
+    SocketFlutterPlugin myIO = new SocketFlutterPlugin();
+    myIO.socket(
+        "http://ec2-13-235-73-103.ap-south-1.compute.amazonaws.com:3000/");
+    myIO.connect();
+    myIO.emit("userLive", widget.channelName);
   }
 
   _leaveChanel() {
@@ -408,10 +424,10 @@ class _GoLiveState extends State<GoLive> {
     });
   }
 
-   _sendNotification()async{
-     var result = await http.post(
+  _sendNotification() async {
+    var result = await http.post(
         "http://ec2-13-235-73-103.ap-south-1.compute.amazonaws.com:3000/notifications/",
         body: {"uid": widget.channelName});
-        print(result.body);
+    print(result.body);
   }
 }

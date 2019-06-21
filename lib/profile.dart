@@ -19,7 +19,7 @@ class _ProfileState extends State<Profile> {
   int _likes = 0;
   int _viewers = 0;
   int level = 0;
-  String _userName = "";
+  String _userName = "", uPic = "";
 
   bool loading = true;
   FirebaseAuth auth;
@@ -163,10 +163,8 @@ class _ProfileState extends State<Profile> {
                                   elevation: 5.0,
                                   shape: CircleBorder(),
                                   child: CircleAvatar(
-                                    radius: 40.0,
-                                    backgroundImage:
-                                        AssetImage('assets/images/logob.png'),
-                                  ),
+                                      radius: 40.0,
+                                      backgroundImage: NetworkImage(uPic)),
                                 ),
                               ],
                             ),
@@ -199,33 +197,31 @@ class _ProfileState extends State<Profile> {
                 animation: "Untitled",
               ),
             ),
-            bottomNavigationBar: Padding(
-                  padding: const EdgeInsets.all(30.0),
-                  child: InkWell(
-                    onTap: ()  {
-                       Navigator.of(context).push(new MaterialPageRoute(
-                        settings: const RouteSettings(name: '/Wallet'),
-                        builder: (context) => Wallet(
-                          uid: user.uid
-                        )));
-                    },
-                    child: Container(
-                      height: 45,
-                      // width:100 ,
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Color(0xFFf45d27), Color(0xFFf5851f)],
-                          ),
-                          borderRadius: BorderRadius.all(Radius.circular(50))),
-                      child: Center(
-                          child: Text(
-                        "Wallet",
-                        style: TextStyle(color: Colors.white),
-                      )),
-                    ),
-                  ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(30.0),
+        child: InkWell(
+          onTap: () {
+            Navigator.of(context).push(new MaterialPageRoute(
+                settings: const RouteSettings(name: '/Wallet'),
+                builder: (context) => Wallet(uid: user.uid)));
+          },
+          child: Container(
+            height: 45,
+            // width:100 ,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFf45d27), Color(0xFFf5851f)],
                 ),
+                borderRadius: BorderRadius.all(Radius.circular(50))),
+            child: Center(
+                child: Text(
+              "Wallet",
+              style: TextStyle(color: Colors.white),
+            )),
+          ),
+        ),
+      ),
     );
   }
 
@@ -365,6 +361,7 @@ class _ProfileState extends State<Profile> {
         setState(() {
           _followers = flwrs.length;
           _userName = doc.data['username'];
+          uPic=doc.data['pic'];
           level = doc.data['level'];
           loading = false;
         });
@@ -404,11 +401,13 @@ class _ProfileState extends State<Profile> {
     print(level);
     print(tempLevel);
     if (tempLevel != level) {
-      Firestore.instance.collection("Users").document(user.uid).updateData({"level":tempLevel}).then((onValue){
-
- 
-      });
+      Firestore.instance
+          .collection("Users")
+          .document(user.uid)
+          .updateData({"level": tempLevel}).then((onValue) {});
       await prefs.setInt('level', tempLevel);
     }
   }
+
+
 }

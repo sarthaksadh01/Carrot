@@ -18,11 +18,13 @@ class _State extends State<Categories> {
       child: Scaffold(
         appBar: TabBar(
           indicatorColor: Color(0xfffd6a02),
-
-          
           tabs: [
-            Tab(icon: Icon(Icons.screen_share,color:Color(0xfffd6a02),)),
-            Tab(icon: Icon(Icons.camera,color: Color(0xfffd6a02))),
+            Tab(
+                icon: Icon(
+              Icons.screen_share,
+              color: Color(0xfffd6a02),
+            )),
+            Tab(icon: Icon(Icons.camera, color: Color(0xfffd6a02))),
           ],
         ),
         body: TabBarView(
@@ -77,14 +79,30 @@ class _State extends State<Categories> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    "${ds['name']}",
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xfffd6a02)),
+                                Flexible(
+                                  child: Container(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                              new MaterialPageRoute(
+                                                  settings: const RouteSettings(
+                                                      name: '/Sub'),
+                                                  builder: (context) =>
+                                                      new SubCategoryFull(
+                                                          sub: ds['name'])));
+                                        },
+                                        child: Text(
+                                          "${ds['name']}",
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xfffd6a02)),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -154,14 +172,30 @@ class _State extends State<Categories> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    "${ds['name']}",
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xfffd6a02)),
+                                Flexible(
+                                  child: Container(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                              new MaterialPageRoute(
+                                                  settings: const RouteSettings(
+                                                      name: '/Sub'),
+                                                  builder: (context) =>
+                                                      new SubCategoryFull(
+                                                          sub: ds['name'])));
+                                        },
+                                        child: Text(
+                                          "${ds['name']}",
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xfffd6a02)),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],

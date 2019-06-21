@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import './signup_b.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import './signup_b.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:ui';
 
@@ -22,7 +24,6 @@ class _SignupAFullState extends State<SignupAFull> {
               color: Color(0xfffd6a02),
               child: Image.asset("assets/images/logo.png"),
             ),
-      
             Center(
               child: new ClipRect(
                 child: new BackdropFilter(
@@ -92,37 +93,47 @@ class _SignupAFullState extends State<SignupAFull> {
                 ),
               ),
             ),
-           
-            
           ],
         ));
   }
 
   _googleSignIn() async {
-    final googleSignIn = new GoogleSignIn();
-    GoogleSignInAccount user = googleSignIn.currentUser;
-    await googleSignIn.signIn().then((account) {
-      user = account;
-    }, onError: (error) {
-      Fluttertoast.showToast(
-          msg: error.toString(),
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIos: 1,
-          backgroundColor: Color(0xfffd6a02),
-          textColor: Colors.white,
-          fontSize: 16.0);
-    }).whenComplete(() {
-      if (user == null) return;
-      Navigator.of(context).pushReplacement(new MaterialPageRoute(
-          settings: const RouteSettings(name: '/SignUpB'),
-          builder: (context) => new SignupBFull(
-                email: user.email,
-                name: user.displayName,
-                photo: user.displayName,
-              )));
-    });
-  }
+    // final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+    final GoogleSignIn _googleSignIn = GoogleSignIn();
+    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+    print(googleUser);
+    if (googleUser == null) return;
+    // Navigator.of(context).pushReplacement(new MaterialPageRoute(
+    //     settings: const RouteSettings(name: '/SignUpB'),
+    //     builder: (context) => new SignupBFull(
+    //           email: googleUser.email,
+    //           name: googleUser.displayName,
+    //           photo: googleUser.displayName,
+    //         )));
 
-  
+    // GoogleSignInAccount user = googleSignIn.currentUser;
+    // await googleSignIn.signIn().then((account) {
+    //   user = account;
+    // }, onError: (error) {
+    //   Fluttertoast.showToast(
+    //       msg: error.toString(),
+    //       toastLength: Toast.LENGTH_SHORT,
+    //       gravity: ToastGravity.BOTTOM,
+    //       timeInSecForIos: 1,
+    //       backgroundColor: Color(0xfffd6a02),
+    //       textColor: Colors.white,
+    //       fontSize: 16.0);
+    // }).whenComplete(() {
+    //   print("hajahahah");
+    //   print(user);
+    //   if (user == null) return;
+    //   Navigator.of(context).pushReplacement(new MaterialPageRoute(
+    //       settings: const RouteSettings(name: '/SignUpB'),
+    //       builder: (context) => new SignupBFull(
+    //             email: user.email,
+    //             name: user.displayName,
+    //             photo: user.displayName,
+    //           )));
+    // });
+  }
 }

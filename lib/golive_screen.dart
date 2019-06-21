@@ -2,13 +2,13 @@ import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:device_apps/device_apps.dart';
+
 import 'package:random_string/random_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 
 class ScreenRecord extends StatefulWidget {
-  final String channelName, category, title, username, img;
+  final String channelName, category, title, username, img,uPic;
   final List<String> hashtags;
   final int level;
   const ScreenRecord(
@@ -19,7 +19,8 @@ class ScreenRecord extends StatefulWidget {
       this.title,
       this.username,
       this.img,
-      this.level})
+      this.level,
+      this.uPic})
       : super(key: key);
 
   @override
@@ -161,7 +162,8 @@ class _ScreenRecordState extends State<ScreenRecord> {
       'img': widget.img,
       'start_time': DateTime.now().millisecondsSinceEpoch,
       'level':widget.level,
-       'type':"ScreenRecord"
+       'type':"ScreenRecord",
+       "upic":widget.uPic
     }).then((doc) {
       _sendNotification();
       setState(() {

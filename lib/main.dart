@@ -63,7 +63,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String username = " ";
+  String userImage = " ";
   bool logout = false;
   FirebaseAuth auth;
   FirebaseUser user;
@@ -120,13 +120,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 Padding(
                     padding: EdgeInsets.all(80),
                     child: CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Color(0xfffd6a02),
-                      child: Text(
-                        username[0],
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    )),
+                        radius: 50,
+                        backgroundColor: Color(0xfffd6a02),
+                        backgroundImage: NetworkImage(userImage))),
                 _profileData(),
                 //  Spacer(),
                 Padding(
@@ -268,7 +264,7 @@ class _MyHomePageState extends State<MyHomePage> {
           }
           var userDocument = snapshot.data;
 
-          username = userDocument["username"];
+          userImage = userDocument["pic"];
 
           return new Column(
             children: <Widget>[
