@@ -72,10 +72,10 @@ testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
      implementation 'io.agora.rtc:full-sdk:2.4.0'
      compile 'com.android.support:multidex:1.0.3'
-  compile ('io.socket:socket.io-client:0.8.3') {
-    // excluding org.json which is provided by Android
-    exclude group: 'org.json', module: 'json'
-}
+     implementation 'com.github.nkzawa:socket.io-client:0.6.0'
+
+
+
 
      
 }

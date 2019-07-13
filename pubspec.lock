@@ -296,13 +296,15 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
-  socket_flutter_plugin:
+  socket_io:
     dependency: "direct dev"
     description:
-      name: socket_flutter_plugin
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.1"
+      path: "."
+      ref: HEAD
+      resolved-ref: "7d8c1c6ae19f4c667d51ca29754d65a36088a3ac"
+      url: "https://github.com/AlexeySemigradsky/socket_io.git"
+    source: git
+    version: "0.1.0"
   source_span:
     dependency: transitive
     description:
@@ -359,6 +361,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.6"
+  url_launcher:
+    dependency: "direct dev"
+    description:
+      name: url_launcher
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.0.2"
   vector_math:
     dependency: transitive
     description:

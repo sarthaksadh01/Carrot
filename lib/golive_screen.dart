@@ -3,12 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import './url.dart';
+
 import 'package:random_string/random_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 
 class ScreenRecord extends StatefulWidget {
-  final String channelName, category, title, username, img,uPic;
+  final String channelName, category, title, username, img, uPic;
   final List<String> hashtags;
   final int level;
   const ScreenRecord(
@@ -56,43 +58,6 @@ class _ScreenRecordState extends State<ScreenRecord> {
                 fit: BoxFit.contain,
                 animation: "Untitled",
               )
-            // ? FutureBuilder(
-            //     future: DeviceApps.getInstalledApplications(
-            //         includeAppIcons: true,
-            //         includeSystemApps: true,
-            //         onlyAppsWithLaunchIntent: true),
-            //     builder: (context, data) {
-            //       if (data.data == null) {
-            //         return Center(child: CircularProgressIndicator());
-            //       } else {
-            //         List<Application> apps = data.data;
-            //         print(apps);
-            //         return ListView.builder(
-            //             itemBuilder: (context, position) {
-            //               Application app = apps[position];
-            //               return Column(
-            //                 children: <Widget>[
-            //                   ListTile(
-            //                     leading: app is ApplicationWithIcon
-            //                         ? CircleAvatar(
-            //                             backgroundImage: MemoryImage(app.icon),
-            //                             backgroundColor: Colors.white,
-            //                           )
-            //                         : null,
-            //                     onTap: () {
-            //                       _startScreenShare(app.appName);
-            //                     },
-            //                     title: Text("${app.appName}"),
-            //                   ),
-            //                   Divider(
-            //                     height: 1.0,
-            //                   )
-            //                 ],
-            //               );
-            //             },
-            //             itemCount: apps.length);
-            //       }
-            //     })
             : Center(
                 child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -138,11 +103,9 @@ class _ScreenRecordState extends State<ScreenRecord> {
           _started = false;
         });
         _leaveChanel();
-       Navigator.pushReplacementNamed(context, '/Home');
+        Navigator.pushReplacementNamed(context, '/Home');
       }
     } on PlatformException catch (e) {}
-
-   
   }
 
   _updateDatabase(String appName) {
@@ -161,15 +124,14 @@ class _ScreenRecordState extends State<ScreenRecord> {
       'title': widget.title,
       'img': widget.img,
       'start_time': DateTime.now().millisecondsSinceEpoch,
-      'level':widget.level,
-       'type':"ScreenRecord",
-       "upic":widget.uPic
+      'level': widget.level,
+      'type': "ScreenRecord",
+      "upic": widget.uPic
     }).then((doc) {
       _sendNotification();
       setState(() {
         _started = true;
       });
-//  _openApp(appName);
     }).catchError((e) {});
   }
 
@@ -198,10 +160,9 @@ class _ScreenRecordState extends State<ScreenRecord> {
     } on PlatformException catch (e) {}
   }
 
-  _sendNotification()async{
-     var result = await http.post(
-        "http://ec2-13-235-73-103.ap-south-1.compute.amazonaws.com:3000/notifications/",
-        body: {"uid": widget.channelName});
-        print(result.body);
+  _sendNotification() async {
+    var result = await http
+        .post(URL + "/notifications/", body: {"uid": widget.channelName});
+    print(result.body);
   }
 }

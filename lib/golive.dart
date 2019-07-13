@@ -5,12 +5,15 @@ import './agora_utils/videosession.dart';
 import './agora_utils/settings.dart';
 import 'package:random_string/random_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:socket_flutter_plugin/socket_flutter_plugin.dart';
+import 'package:socket_io/socket_io.dart';
+
+import './url.dart';
+
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 
 class GoLive extends StatefulWidget {
-  final String channelName, category, title, username, img,uPic;
+  final String channelName, category, title, username, img, uPic;
   final List<String> hashtags;
   final int level;
 
@@ -359,7 +362,7 @@ class _GoLiveState extends State<GoLive> {
                             "${ds['viewers'].length}",
                             style: TextStyle(
                                 color: Colors.white,
-                                fontWeight: FontWeight.w900 ),
+                                fontWeight: FontWeight.w900),
                           ),
                         )
                       ],
@@ -388,7 +391,7 @@ class _GoLiveState extends State<GoLive> {
       'start_time': DateTime.now().millisecondsSinceEpoch,
       'type': "Camera",
       "level": widget.level,
-      "upic":widget.uPic
+      "upic": widget.uPic
     }).then((doc) {
       _socketConnection();
       _sendNotification();
@@ -399,12 +402,28 @@ class _GoLiveState extends State<GoLive> {
     // _onDisconnect();
   }
 
-  _socketConnection() {
-    SocketFlutterPlugin myIO = new SocketFlutterPlugin();
-    myIO.socket(
-        "http://ec2-13-235-73-103.ap-south-1.compute.amazonaws.com:3000/");
-    myIO.connect();
-    myIO.emit("userLive", widget.channelName);
+  _socketConnection() async {
+    const uri = URL;
+    final socket = await SocketIO.createNewInstance(uri);
+    await socket.on(SocketIOEvent.connecting, () async {
+      print('Connecting...');
+    });
+    await socket.on(SocketIOEvent.connect, () async {
+      print('Connected.');
+
+      final id = await socket.id;
+      print('Client SocketID: $id');
+    });
+    await socket.on(SocketIOEvent.connectError, (error) {
+      print('Error: $error');
+    });
+    await socket.on('noOfUsersLive', (count) {
+      print('No of users are, $count');
+    });
+    await socket.connect();
+    await socket.emit('userLive', [
+      {'uid': widget.channelName},
+    ]);
   }
 
   _leaveChanel() {
@@ -425,9 +444,8 @@ class _GoLiveState extends State<GoLive> {
   }
 
   _sendNotification() async {
-    var result = await http.post(
-        "http://ec2-13-235-73-103.ap-south-1.compute.amazonaws.com:3000/notifications/",
-        body: {"uid": widget.channelName});
+    var result = await http
+        .post(URL + "/notifications/", body: {"uid": widget.channelName});
     print(result.body);
   }
 }

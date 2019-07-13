@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:socket_io/socket_io.dart';
+import './url.dart';
 
 class SplashFull extends StatefulWidget {
   @override
@@ -12,6 +14,7 @@ class _SplashFullState extends State<SplashFull> {
   @override
   void initState() {
     _permission();
+
     super.initState();
   }
 
@@ -19,20 +22,14 @@ class _SplashFullState extends State<SplashFull> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Color(0xfffd6a02),
-        body: Center(
-            child: Image.asset(
+        body: Image.asset(
           "assets/images/logo.png",
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
-        ))
-        //
-
-        //
-        );
+        ));
   }
 
   _permission() async {
-    // _nextPage();
     const platform = const MethodChannel('samples.flutter.io/screen_record');
     try {
       final String result = await platform.invokeMethod('requestPermission');

@@ -5,6 +5,7 @@ import 'package:flare_flutter/flare_actor.dart';
 import 'package:http/http.dart' as http;
 import './profile_card.dart';
 import './donate.dart';
+import './url.dart';
 
 class OtherProfile extends StatefulWidget {
   OtherProfile({this.fullName, this.uid});
@@ -378,8 +379,7 @@ class _OtherProfileState extends State<OtherProfile> {
   }
 
   _sendFollowNotification() async {
-    var result = await http.post(
-        "http://ec2-13-235-73-103.ap-south-1.compute.amazonaws.com:3000/followNotifications/",
+    var result = await http.post(URL + "/followNotifications/",
         body: {"uid": widget.uid, "followedBy": user.uid});
     print(result.body);
   }
