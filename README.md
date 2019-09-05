@@ -2,6 +2,12 @@
 
 A cross platform mobile app to share screen while playing games on mobile device.
 
+## Features
+Screen share <br>
+Share video using camera<br>
+Real time chat.<br>
+Donate money using upi<br>
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
