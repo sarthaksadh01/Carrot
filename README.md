@@ -1,6 +1,6 @@
-# simosa
+# Carrot
 
-A new Flutter project.
+A cross platform mobile app to share screen while playing games on mobile device.
 
 ## Getting Started
 
