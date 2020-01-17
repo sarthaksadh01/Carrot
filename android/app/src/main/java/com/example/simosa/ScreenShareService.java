@@ -6,14 +6,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.IBinder;
 
 import android.content.Context;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.NotificationCompat;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
@@ -36,7 +34,7 @@ import io.agora.rtc.ss.capture.ScreenCapture;
 import io.agora.rtc.video.AgoraVideoFrame;
 import io.agora.rtc.video.VideoEncoderConfiguration;
 
-import static android.support.v4.app.NotificationCompat.PRIORITY_HIGH;
+import static androidx.core.app.NotificationCompat.PRIORITY_HIGH;
 
 public class ScreenShareService extends Service {
 

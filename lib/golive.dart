@@ -99,10 +99,11 @@ class _GoLiveState extends State<GoLive> {
 
   /// Add agora event handlers
   void _addAgoraEventHandlers() {
-    AgoraRtcEngine.onError = (int code) {
+
+    AgoraRtcEngine.onError = (dynamic code) {
       setState(() {
         String info = 'onError: ' + code.toString();
-        // _infoStrings.add(info);
+        _infoStrings.add(info);
       });
     };
 
@@ -157,7 +158,8 @@ class _GoLiveState extends State<GoLive> {
   /// Create a native view and add a new video session object
   /// The native viewId can be used to set up local/remote view
   void _addRenderView(int uid, Function(int viewId) finished) {
-    Widget view = AgoraRtcEngine.createNativeView(uid, (viewId) {
+
+    Widget view = AgoraRtcEngine.createNativeView((viewId) {
       setState(() {
         _getVideoSession(uid).viewId = viewId;
         if (finished != null) {
@@ -165,6 +167,7 @@ class _GoLiveState extends State<GoLive> {
         }
       });
     });
+
     VideoSession session = VideoSession(uid, view);
     _sessions.add(session);
   }

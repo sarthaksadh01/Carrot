@@ -105,7 +105,7 @@ class _GoLiveState extends State<ViewLive> {
         // _infoStrings.add(info);
       });
     };
-    AgoraRtcEngine.onError = (int code) {
+    AgoraRtcEngine.onError = (dynamic code) {
       setState(() {
         String info = 'onError: ' + code.toString();
         Fluttertoast.showToast(
@@ -164,7 +164,7 @@ class _GoLiveState extends State<ViewLive> {
   }
 
   void _addRenderView(int uid, Function(int viewId) finished) {
-    Widget view = AgoraRtcEngine.createNativeView(uid, (viewId) {
+    Widget view = AgoraRtcEngine.createNativeView((viewId) {
       setState(() {
         _getVideoSession(uid).viewId = viewId;
         if (finished != null) {
